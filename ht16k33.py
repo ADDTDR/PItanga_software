@@ -2,23 +2,24 @@ from smbus2 import SMBus
 import time
 from font5x7 import Font5x7
 
-HT16K33_ADDRESS = 0x71
+HT16K33_ADDRESS_1 = 0x71
+HT16K33_ADDRESS_0 = 0x70
 HT16K33_CMD_BRIGHTNESS = 0xE0
 
 
 class HT16K33():
-    def __init__(self):
+    def __init__(self, ht16k33_i2c_address):
         
         bus = SMBus(0)
         #turn on oscilator 
-        bus.write_byte(HT16K33_ADDRESS, 0x21)
+        bus.write_byte(ht16k33_i2c_address, 0x21)
         #enable display (no blinking mode)
-        bus.write_byte(HT16K33_ADDRESS, 0x81)
+        bus.write_byte(ht16k33_i2c_address, 0x81)
         #clear dispay 
-        bus.write_i2c_block_data(HT16K33_ADDRESS, 0x00, [0x00] * 16)
+        bus.write_i2c_block_data(ht16k33_i2c_address, 0x00, [0x00] * 16)
         #set brightness 0-15
-        bus.write_byte(HT16K33_ADDRESS, HT16K33_CMD_BRIGHTNESS | 10)
-
+        bus.write_byte(ht16k33_i2c_address, HT16K33_CMD_BRIGHTNESS | 10)
+        self.ht16k33_i2c_address = ht16k33_i2c_address
         self.bus = bus
         self.buffer = [0x00 for x in range(0, 16)]
 
@@ -34,7 +35,7 @@ class HT16K33():
 
     def clear(self):
         self.buffer = [ 0x00 for x in range(0, 16)]
-        self.bus.write_i2c_block_data(HT16K33_ADDRESS, 0x00, self.buffer)
+        self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, self.buffer)
 
     def write_number(self, a, b, c):  
         bx = []
@@ -95,19 +96,24 @@ class HT16K33():
         self.buffer[15] = 0x00
 
         #write data 
-        self.bus.write_i2c_block_data(HT16K33_ADDRESS, 0x00, self.buffer)
+        self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, self.buffer)
 
 
 
 
-ht_1 = HT16K33()
+ht_1 = HT16K33(ht16k33_i2c_address=HT16K33_ADDRESS_1)
 ht_1.clear()
+
+ht_0 = HT16K33(ht16k33_i2c_address=HT16K33_ADDRESS_0)
+ht_0.clear()
 
 while True:
     for i in range(0 , 10 -3):
         #bus.write_byte(HT16K33_ADDRESS, HT16K33_CMD_BRIGHTNESS | i)
         ht_1.write_number(Font5x7[i], Font5x7[i+1], Font5x7[i+2])
-        time.sleep(0.1)
+        ht_0.write_number(Font5x7[i], Font5x7[i], Font5x7[i])
+        time.sleep(0.5)
         ht_1.clear()
+        ht_0.clear()
 
 
