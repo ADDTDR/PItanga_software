@@ -37,7 +37,7 @@ class HT16K33():
 
     def clear(self):
         self.buffer = [ 0x00 for x in range(0, 16)]
-        self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, self.buffer)
+        #self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, self.buffer)
 
     def write_number(self, a, b, c):  
         bx = []
@@ -123,7 +123,7 @@ while True:
         ch[4] = j
         ht_0.write_number(Font5x7[int(current_time[2])], ch, Font5x7[int(current_time[0])])
 
-        time.sleep(1)
+        time.sleep(0.1)
         ht_1.clear()
         ht_0.clear()
 
