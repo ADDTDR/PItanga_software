@@ -11,7 +11,6 @@ HT16K33_CMD_BRIGHTNESS = 0xE0
 class HT16K33():
 
     def __init__(self, ht16k33_i2c_address):
-
         bus = SMBus(0)
         #turn on oscilator 
         bus.write_byte(ht16k33_i2c_address, 0x21)
@@ -39,7 +38,7 @@ class HT16K33():
         self.buffer = [ 0x00 for x in range(0, 16)]
         #self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, self.buffer)
 
-    def write_number(self, a, b, c):  
+    def write_data(self, a, b, c):  
         bx = []
         ax = self.rotate_90(a)
         kx = self.rotate_90(b)
@@ -102,7 +101,7 @@ class HT16K33():
 
 
 
-
+#Initialise drivers 
 ht_1 = HT16K33(ht16k33_i2c_address=HT16K33_ADDRESS_1)
 ht_1.clear()
 
@@ -110,20 +109,26 @@ ht_0 = HT16K33(ht16k33_i2c_address=HT16K33_ADDRESS_0)
 ht_0.clear()
 
 
+#display string, only numbers atm
+def display_print(font, str_data):
+    #clear buffer 
+    ht_1.clear()
+    ht_0.clear()
+
+    ht_1.write_data(font[int(str_data[5])], font[int(str_data[4])], font[int(str_data[3])])
+    #Workaraund for mistake in shematic connection on ds2 
+    ch = [x for x in font[int(str_data[1])]] #Create separate array 
+    j = ch[3]
+    ch[3] = ch[4]
+    ch[4] = j
+    ht_0.write_data(font[int(str_data[2])], ch, font[int(str_data[0])])
+
+    
+
 while True:
-    for i in range(0 , 10 -3):
-        current_time = datetime.now().strftime("%H%M%S")
-        #bus.write_byte(HT16K33_ADDRESS, HT16K33_CMD_BRIGHTNESS | i)
-        ht_1.write_number(Font5x7[int(current_time[5])], Font5x7[int(current_time[4])], Font5x7[int(current_time[3])])
+    current_time = datetime.now().strftime("%H%M%S")
+    display_print(Font5x7, current_time)
+    #display update rate
+    time.sleep(0.5)
 
-        #Workaraund for mistake in shematic connection on ds2 
-        ch = [x for x in Font5x7[int(current_time[1])]] #Create separate array 
-        j = ch[3]
-        ch[3] = ch[4]
-        ch[4] = j
-        ht_0.write_number(Font5x7[int(current_time[2])], ch, Font5x7[int(current_time[0])])
-
-        time.sleep(0.1)
-        ht_1.clear()
-        ht_0.clear()
 
