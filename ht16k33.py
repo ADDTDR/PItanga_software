@@ -19,7 +19,7 @@ class HT16K33():
         #clear dispay 
         bus.write_i2c_block_data(ht16k33_i2c_address, 0x00, [0x00] * 16)
         #set brightness 0-15
-        bus.write_byte(ht16k33_i2c_address, HT16K33_CMD_BRIGHTNESS | 5)
+        bus.write_byte(ht16k33_i2c_address, HT16K33_CMD_BRIGHTNESS | 15)
         self.ht16k33_i2c_address = ht16k33_i2c_address
         self.bus = bus
         self.buffer = [0x00 for x in range(0, 16)]
@@ -27,7 +27,8 @@ class HT16K33():
     def rotate_90(self, a):
         b = []
         for k in range(0, 7):
-            q = [(a[0] & (1 << k)) >> k , (a[1] & (1 << k)) >> k , (a[2] & (1 << k)) >> k,  (a[3] & (1 << k)) >> k,  (a[4] & (1 << k)) >> k]
+            #q = [(a[0] & (1 << k)) >> k , (a[1] & (1 << k)) >> k , (a[2] & (1 << k)) >> k,  (a[3] & (1 << k)) >> k,  (a[4] & (1 << k)) >> k]	
+	    q = [(x & (1 << k)) >> k for x in a ]	
             qi = 0
             for bit in q:    
                 qi = (qi << 1) | bit
@@ -41,6 +42,11 @@ class HT16K33():
     def write_data(self, a, b, c):  
         bx = []
         ax = self.rotate_90(a)
+        #ax = self.rotate_90(ax)
+        #ax = self.rotate_90(ax)
+        #ax = self.rotate_90(ax)
+       	#ax = self.rotate_90(ax)
+
         kx = self.rotate_90(b)
         cx = self.rotate_90(c)
         
