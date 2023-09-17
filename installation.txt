@@ -1,0 +1,5 @@
+For python 3 
+sudo apt install i2c-tools 
+detect i2c bus list 
+detect i2c device list on i2c bus 
+sudo apt-get install python3-smbus

@@ -1,4 +1,4 @@
-from smbus2 import SMBus
+from smbus import SMBus
 import time
 from font5x7 import Font5x7
 from datetime import datetime
@@ -11,7 +11,7 @@ HT16K33_CMD_BRIGHTNESS = 0xE0
 class HT16K33():
 
     def __init__(self, ht16k33_i2c_address):
-        bus = SMBus(0)
+        bus = SMBus(2)
         #turn on oscilator 
         bus.write_byte(ht16k33_i2c_address, 0x21)
         #enable display (no blinking mode)
@@ -28,7 +28,7 @@ class HT16K33():
         b = []
         for k in range(0, 7):
             #q = [(a[0] & (1 << k)) >> k , (a[1] & (1 << k)) >> k , (a[2] & (1 << k)) >> k,  (a[3] & (1 << k)) >> k,  (a[4] & (1 << k)) >> k]	
-	    q = [(x & (1 << k)) >> k for x in a ]	
+            q = [(x & (1 << k)) >> k for x in a ]
             qi = 0
             for bit in q:    
                 qi = (qi << 1) | bit
