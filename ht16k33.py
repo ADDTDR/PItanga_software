@@ -141,12 +141,15 @@ def display_print(font, str_data):
         )
 
     
-
+display_string = "Andruselu "
 while True:
-    current_time = datetime.now().strftime("%H%M%S")
+    current_time = datetime.now().strftime("%H:%M:%S")
+    display_string = display_string 
+
+    display_string = display_string[1:] + display_string[:1]
     # current_time = "Andrus"
-    display_print(Font5x7, current_time)
+    display_print(Font5x7, display_string[:6])
     #display update rate
-    time.sleep(0.5)
+    time.sleep(0.2)
 
 
