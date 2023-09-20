@@ -1,6 +1,6 @@
 from smbus import SMBus
 import time
-from font5x7 import Font5x7
+from font5x7 import Font5x7_full as Font5x7
 from datetime import datetime
 
 HT16K33_ADDRESS_1 = 0x71
@@ -115,24 +115,36 @@ ht_0 = HT16K33(ht16k33_i2c_address=HT16K33_ADDRESS_0)
 ht_0.clear()
 
 
-#display string, only numbers atm
+#display string
 def display_print(font, str_data):
-    #clear buffer 
+    #Clear buffer 
     ht_1.clear()
     ht_0.clear()
+    font_first_char = 0x20
 
-    ht_1.write_data(font[int(str_data[5])], font[int(str_data[4])], font[int(str_data[3])])
+    #Write data  led driver 
+    ht_1.write_data(
+        font[ord(str_data[5])- font_first_char],
+        font[ord(str_data[4])- font_first_char],
+        font[ord(str_data[3])- font_first_char]
+    )
+    #Write data  led driver
     #Workaraund for mistake in shematic connection on ds2 
-    ch = [x for x in font[int(str_data[1])]] #Create separate array 
+    ch = [x for x in font[ord(str_data[1])- font_first_char]] #Create separate array 
     j = ch[3]
     ch[3] = ch[4]
     ch[4] = j
-    ht_0.write_data(font[int(str_data[2])], ch, font[int(str_data[0])])
+    ht_0.write_data(
+        font[ord(str_data[2])- font_first_char],
+        ch,
+        font[ord(str_data[0])- font_first_char]
+        )
 
     
 
 while True:
     current_time = datetime.now().strftime("%H%M%S")
+    # current_time = "Andrus"
     display_print(Font5x7, current_time)
     #display update rate
     time.sleep(0.5)
