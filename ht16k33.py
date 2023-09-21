@@ -2,7 +2,7 @@ from smbus import SMBus
 import time
 from font5x7 import Font5x7_full as Font5x7
 from datetime import datetime
-
+from pikachu import pikachu
 HT16K33_ADDRESS_1 = 0x71
 HT16K33_ADDRESS_0 = 0x70
 HT16K33_CMD_BRIGHTNESS = 0xE0
@@ -39,17 +39,72 @@ class HT16K33():
         self.buffer = [ 0x00 for x in range(0, 16)]
         #self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, self.buffer)
 
+    def write_data_raw(self, a, b, c):  
+        bx = []
+        ax = a
+        kx = b 
+        cx = c
+        
+        #push data to common raw buffer 
+        for e in ax:
+            bx.append(e)
+        for e in kx:
+            bx.append(e)
+        for e in cx:
+            bx.append(e)
+
+        #Distribute data between lines 
+        #place 3 
+        self.buffer[0] = bx[0] & 0x1f
+        self.buffer[2] = bx[1] & 0x1f
+        self.buffer[4] = bx[2] & 0x1f
+        self.buffer[6] = bx[3] & 0x1f
+        self.buffer[8] = bx[4] & 0x1f 
+        self.buffer[10] = bx[5] & 0x1f  
+        self.buffer[12] = bx[6] & 0x1f
+        self.buffer[14] = 0xff & 0x00 
+    
+        #place 2 
+        self.buffer[1] = (bx[0+7] >> 3) & 0x03
+        self.buffer[0] = self.buffer[0] | (((bx[0+7] & 7) << 5)  & 0xff)
+
+        self.buffer[3] = (bx[1+7] >> 3) & 0x03
+        self.buffer[2] = self.buffer[2] | (((bx[1+7] & 7) << 5)  & 0xff)    
+
+        self.buffer[5] = (bx[2+7] >> 3) & 0x03
+        self.buffer[4] = self.buffer[4] | (((bx[2+7] & 7) << 5)  & 0xff)
+
+        self.buffer[7] = (bx[3+7] >> 3) & 0x03
+        self.buffer[6] = self.buffer[6] | (((bx[3+7] & 7) << 5)  & 0xff)
+
+        self.buffer[9] = (bx[4+7] >> 3)& 0x03
+        self.buffer[8] = self.buffer[8] | (((bx[4+7] & 7) << 5)  & 0xff)
+
+        self.buffer[11] = (bx[5+7] >> 3) & 0x03
+        self.buffer[10] = self.buffer[10] | (((bx[5+7] & 7) << 5)  & 0xff)
+
+        self.buffer[13] = (bx[6+7] >> 3) & 0x03
+        self.buffer[12] = self.buffer[12] | (((bx[6+7] & 7) << 5)  & 0xff)
+
+
+        #place 1
+        self.buffer[1] = self.buffer[1] | (bx[0+14] & 0xff) << 2
+        self.buffer[3] = self.buffer[3] | (bx[1+14] & 0xff) << 2
+        self.buffer[5] = self.buffer[5] | (bx[2+14] & 0xff) << 2
+        self.buffer[7] = self.buffer[7] | (bx[3+14] & 0xff) << 2
+        self.buffer[9] = self.buffer[9] | (bx[4+14] & 0xff) << 2
+        self.buffer[11] = self.buffer[11] | (bx[5+14] & 0xff) << 2
+        self.buffer[13] = self.buffer[13] | (bx[6+14] & 0xff) << 2
+        self.buffer[15] = 0x00
+
+        #write data 
+        self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, self.buffer)
+
     def write_data(self, a, b, c):  
         bx = []
         ax = self.rotate_90(a)
-        #ax = self.rotate_90(ax)
-        #ax = self.rotate_90(ax)
-        #ax = self.rotate_90(ax)
-       	#ax = self.rotate_90(ax)
-
         kx = self.rotate_90(b)
         cx = self.rotate_90(c)
-        
         #push data to common raw buffer 
         for e in ax:
             bx.append(e)
@@ -115,7 +170,7 @@ ht_0 = HT16K33(ht16k33_i2c_address=HT16K33_ADDRESS_0)
 ht_0.clear()
 
 
-#display string
+#display string 6 char
 def display_print(font, str_data):
     #Clear buffer 
     ht_1.clear()
@@ -140,16 +195,50 @@ def display_print(font, str_data):
         font[ord(str_data[0])- font_first_char]
         )
 
+
+
+def dispay_bitmap(pikachu_d):
+    pikachu_slice = pikachu_d[:7]
     
-display_string = "Andruselu "
+    # display data from 6 to 1
+    led_display_data = []
+    for x in range(0, 30, 5):
+        # start from first line to the end 
+        char = []
+        for line in pikachu_slice:               
+            char_line = line[:-x] if x > 0 else line
+            char_line = char_line[25-x:]
+            # print(char_line)
+            # char.append(char_line)
+            char.append(int("".join(str(x) for x in char_line), 2))
+        led_display_data.append(char)
+
+    
+    ht_1.clear()
+    ht_0.clear()
+    ht_1.write_data_raw(
+        led_display_data[0],
+        led_display_data[1],
+        led_display_data[2]
+    )
+    ht_0.write_data_raw(
+        led_display_data[3],
+        led_display_data[4],
+        led_display_data[5]
+    )
+
+display_string = "Motanas si Pisicuta) "
+pikachu_d = pikachu
 while True:
     current_time = datetime.now().strftime("%H:%M:%S")
     display_string = display_string 
-
     display_string = display_string[1:] + display_string[:1]
-    # current_time = "Andrus"
-    display_print(Font5x7, display_string[:6])
+
+    #scrol up    
+    pikachu_d = pikachu_d[1:] + pikachu_d[:1]
+    dispay_bitmap(pikachu_d)
+    # display_print(Font5x7, display_string[:6])
     #display update rate
-    time.sleep(0.2)
+    time.sleep(0.09)
 
 
