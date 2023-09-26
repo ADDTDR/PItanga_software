@@ -1,6 +1,7 @@
 from smbus import SMBus
 import time
 from font5x7 import Font5x7_full as Font5x7
+from font3x5 import Font3x5
 from datetime import datetime
 from pikachu import pikachu
 HT16K33_ADDRESS_1 = 0x71
@@ -19,7 +20,7 @@ class HT16K33():
         #clear dispay 
         bus.write_i2c_block_data(ht16k33_i2c_address, 0x00, [0x00] * 16)
         #set brightness 0-15
-        bus.write_byte(ht16k33_i2c_address, HT16K33_CMD_BRIGHTNESS | 15)
+        bus.write_byte(ht16k33_i2c_address, HT16K33_CMD_BRIGHTNESS | 2)
         self.ht16k33_i2c_address = ht16k33_i2c_address
         self.bus = bus
         self.buffer = [0x00 for x in range(0, 16)]
@@ -103,8 +104,19 @@ class HT16K33():
     def write_data(self, a, b, c):  
         bx = []
         ax = self.rotate_90(a)
+        # ax= self.rotate_90(ax)
+        # ax= self.rotate_90(ax)
+        # ax= self.rotate_90(ax)
+
         kx = self.rotate_90(b)
+        # kx = self.rotate_90(kx)
+        # kx = self.rotate_90(kx)
+        # kx = self.rotate_90(kx)
+
         cx = self.rotate_90(c)
+        # cx = self.rotate_90(cx)
+        # cx = self.rotate_90(cx)
+        # cx = self.rotate_90(cx)
         #push data to common raw buffer 
         for e in ax:
             bx.append(e)
@@ -227,18 +239,20 @@ def dispay_bitmap(pikachu_d):
         led_display_data[5]
     )
 
-display_string = "Motanas si Pisicuta) "
+display_string = "Motanas si Pisicuta ) "
 pikachu_d = pikachu
 while True:
-    current_time = datetime.now().strftime("%H:%M:%S")
-    display_string = display_string 
+    current_time = datetime.now().strftime("%H%M%S")
+    # display_string = display_string 
     display_string = display_string[1:] + display_string[:1]
 
     #scrol up    
-    pikachu_d = pikachu_d[1:] + pikachu_d[:1]
-    dispay_bitmap(pikachu_d)
-    # display_print(Font5x7, display_string[:6])
+    # pikachu_d = pikachu_d[1:] + pikachu_d[:1]
+    # dispay_bitmap(pikachu_d)
+
+    display_print(Font5x7, display_string[:6])
     #display update rate
-    time.sleep(0.09)
+    # display_print(Font5x7, current_time)
+    time.sleep(0.5)
 
 
