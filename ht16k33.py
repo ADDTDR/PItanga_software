@@ -20,10 +20,13 @@ class HT16K33():
         #clear dispay 
         bus.write_i2c_block_data(ht16k33_i2c_address, 0x00, [0x00] * 16)
         #set brightness 0-15
-        bus.write_byte(ht16k33_i2c_address, HT16K33_CMD_BRIGHTNESS | 2)
+        bus.write_byte(ht16k33_i2c_address, HT16K33_CMD_BRIGHTNESS | 10)
         self.ht16k33_i2c_address = ht16k33_i2c_address
         self.bus = bus
+        #grafic buffer 
         self.buffer = [0x00 for x in range(0, 16)]
+        #decimal point hardware limited to 1 per 3 5x7 displays sine driver support only 16 rows 
+        self.decimal_dot_bit = 0
 
     def rotate_90(self, a):
         b = []
@@ -39,6 +42,19 @@ class HT16K33():
     def clear(self):
         self.buffer = [ 0x00 for x in range(0, 16)]
         #self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, self.buffer)
+
+    def fill(self):
+        self.buffer = [0xff for x in range(0, 16)]
+    
+    def decimal_dot(self):
+        #first bit connected to decimal point on ltp305
+        #row 14, pin 10,  on ht16k33 
+        self.buffer[13] = 0xff & 0b10000000
+
+
+    def update(self):
+        self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, self.buffer)
+        
 
     def write_data_raw(self, a, b, c):  
         bx = []
@@ -134,7 +150,7 @@ class HT16K33():
         self.buffer[8] = bx[4] & 0x1f 
         self.buffer[10] = bx[5] & 0x1f  
         self.buffer[12] = bx[6] & 0x1f
-        self.buffer[14] = 0xff & 0x00 
+        self.buffer[14] = 0x00
     
         #place 2 
         self.buffer[1] = (bx[0+7] >> 3) & 0x03
@@ -169,6 +185,9 @@ class HT16K33():
         self.buffer[13] = self.buffer[13] | (bx[6+14] & 0xff) << 2
         self.buffer[15] = 0x00
 
+        #place decimal dot 
+        self.buffer[13] = self.buffer[13] | self.decimal_dot_bit << 7
+
         #write data 
         self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, self.buffer)
 
@@ -182,11 +201,33 @@ ht_0 = HT16K33(ht16k33_i2c_address=HT16K33_ADDRESS_0)
 ht_0.clear()
 
 
+# ht_1.decimal_dot()
+# ht_1.update()
+# time.sleep(1.2)
+# ht_1.clear()
+# ht_1.update()
+# time.sleep(1.2)
+# ht_1.decimal_dot()
+# ht_1.update()
+# time.sleep(6)
+
+
 #display string 6 char
 def display_print(font, str_data):
     #Clear buffer 
     ht_1.clear()
     ht_0.clear()
+
+    #dot blinking 
+    x = ht_0.decimal_dot_bit 
+    x = (128 - x) >> 7
+    ht_0.decimal_dot_bit = x
+  
+    x = ht_1.decimal_dot_bit 
+    x = (128 - x) >> 7
+    ht_1.decimal_dot_bit = x
+
+
     font_first_char = 0x20
 
     #Write data  led driver 
@@ -250,9 +291,9 @@ while True:
     # pikachu_d = pikachu_d[1:] + pikachu_d[:1]
     # dispay_bitmap(pikachu_d)
 
-    display_print(Font5x7, display_string[:6])
+    display_print(Font5x7, current_time[:6])
     #display update rate
     # display_print(Font5x7, current_time)
-    time.sleep(0.5)
+    time.sleep(0.33)
 
 
