@@ -20,7 +20,7 @@ class HT16K33():
         #clear dispay 
         bus.write_i2c_block_data(ht16k33_i2c_address, 0x00, [0x00] * 16)
         #set brightness 0-15
-        bus.write_byte(ht16k33_i2c_address, HT16K33_CMD_BRIGHTNESS | 15)
+        bus.write_byte(ht16k33_i2c_address, HT16K33_CMD_BRIGHTNESS | 1)
         self.ht16k33_i2c_address = ht16k33_i2c_address
         self.bus = bus
         #grafic buffer 
