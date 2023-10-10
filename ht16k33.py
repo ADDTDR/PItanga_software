@@ -1,5 +1,6 @@
 from smbus import SMBus
 import time
+import keyboard
 from font5x7 import Font5x7_full as Font5x7
 from font3x5 import Font3x5
 from datetime import datetime
@@ -20,7 +21,7 @@ class HT16K33():
         #clear dispay 
         bus.write_i2c_block_data(ht16k33_i2c_address, 0x00, [0x00] * 16)
         #set brightness 0-15
-        bus.write_byte(ht16k33_i2c_address, HT16K33_CMD_BRIGHTNESS | 1)
+        bus.write_byte(ht16k33_i2c_address, HT16K33_CMD_BRIGHTNESS | 12)
         self.ht16k33_i2c_address = ht16k33_i2c_address
         self.bus = bus
         #grafic buffer 
@@ -226,7 +227,7 @@ def display_print(font, str_data, show_decimal_point=False):
     ht_1.clear()
     ht_0.clear()
 
-    #dot blinking 
+    #dot blinking invert bit 
     if show_decimal_point:
         x = ht_0.decimal_dot_bit 
         x = (128 - x) >> 7
@@ -274,8 +275,6 @@ def dispay_bitmap(pikachu_d):
         for line in pikachu_slice:               
             char_line = line[:-x] if x > 0 else line
             char_line = char_line[25-x:]
-            # print(char_line)
-            # char.append(char_line)
             char.append(int("".join(str(x) for x in char_line), 2))
         led_display_data.append(char)
 
@@ -298,28 +297,32 @@ pikachu_d = pikachu
 show_time = True
 key_lock = False
 cnt = 0
+z = 0
+
+keyboard.start_recording()
 while True:
     
-    
-    
- 
-
-
     current_time = datetime.now().strftime("%H%M%S")
     # display_string = display_string 
     display_string = display_string[1:] + display_string[:1]
 
-    #scrol up    
-    # pikachu_d = pikachu_d[1:] + pikachu_d[:1]
-    # dispay_bitmap(pikachu_d)
-    if ht_1.read_key_data() != 16:
+    if z > 0: 
+        z = z - 1
+
+    if ht_1.read_key_data() == 16 and z == 0:
+        show_time = not show_time
+        z = 3
+    
+    if show_time:
         display_print(Font5x7, current_time[:6], show_decimal_point=True)
     #display update rate
     # display_print(Font5x7, current_time)
-        time.sleep(0.33)
+        time.sleep(0.165)
  
     else:
-        display_print(Font5x7, display_string[:6])
+        # display_print(Font5x7, display_string[:6])
+        pikachu_d = pikachu_d[1:] + pikachu_d[:1]
+        dispay_bitmap(pikachu_d)
     #display update rate
     # display_print(Font5x7, current_time)
         time.sleep(0.12)
