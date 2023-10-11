@@ -21,7 +21,7 @@ class HT16K33():
         #clear dispay 
         bus.write_i2c_block_data(ht16k33_i2c_address, 0x00, [0x00] * 16)
         #set brightness 0-15
-        bus.write_byte(ht16k33_i2c_address, HT16K33_CMD_BRIGHTNESS | 12)
+        bus.write_byte(ht16k33_i2c_address, HT16K33_CMD_BRIGHTNESS | 15)
         self.ht16k33_i2c_address = ht16k33_i2c_address
         self.bus = bus
         #grafic buffer 
@@ -295,37 +295,43 @@ def dispay_bitmap(pikachu_d):
 display_string = "Motanas si Pisicuta si Catelus) "
 pikachu_d = pikachu
 show_time = True
-key_lock = False
-cnt = 0
-z = 0
+display_menu = 0
 
 keyboard.start_recording()
+key_trace = [0, 0]
 while True:
     
     current_time = datetime.now().strftime("%H%M%S")
     # display_string = display_string 
     display_string = display_string[1:] + display_string[:1]
 
-    if z > 0: 
-        z = z - 1
 
-    if ht_1.read_key_data() == 16 and z == 0:
-        show_time = not show_time
-        z = 3
+    key_trace.append(ht_1.read_key_data())
+    key_trace = key_trace[-2:]
+
+    # Togle state only if previosly buton state was 0
+    # Mening botton was realeased 
+    if key_trace[0] == 0 and key_trace[1] == 16:
+        display_menu = display_menu + 1
+        if display_menu == 3:
+            display_menu = 0 
+
     
-    if show_time:
+    
+    if display_menu == 0:
         display_print(Font5x7, current_time[:6], show_decimal_point=True)
     #display update rate
     # display_print(Font5x7, current_time)
-        time.sleep(0.165)
+        time.sleep(0.082)
  
-    else:
+    if display_menu == 1:
         # display_print(Font5x7, display_string[:6])
         pikachu_d = pikachu_d[1:] + pikachu_d[:1]
         dispay_bitmap(pikachu_d)
-    #display update rate
-    # display_print(Font5x7, current_time)
         time.sleep(0.12)
 
-
+    if display_menu == 2:
+        display_print(Font5x7, display_string[:6], show_decimal_point=False)
+        time.sleep(0.1)
+ 
 
