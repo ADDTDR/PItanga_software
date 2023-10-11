@@ -299,6 +299,7 @@ display_menu = 0
 
 keyboard.start_recording()
 key_trace = [0, 0]
+keys = 0b0000
 while True:
     
     current_time = datetime.now().strftime("%H%M%S")
@@ -306,15 +307,35 @@ while True:
     display_string = display_string[1:] + display_string[:1]
 
 
-    key_trace.append(ht_1.read_key_data())
-    key_trace = key_trace[-2:]
+    # 
+    value = 1 if ht_1.read_key_data() == 16 else 0 
+    #shift bits to the left 
+    keys = keys << 1
+    bit_insert_possition = 0 
+    mask = 1 << bit_insert_possition
+    keys = (keys & ~mask) | ((value << bit_insert_possition) & mask)
+    #apply 4 bit mask but 2 bit are enougth do detect rising edge 
+    keys = keys & 0x0f 
 
     # Togle state only if previosly buton state was 0
     # Mening botton was realeased 
-    if key_trace[0] == 0 and key_trace[1] == 16:
-        display_menu = display_menu + 1
-        if display_menu == 3:
-            display_menu = 0 
+    if keys & 0b00000001 == 1 and keys & 0b00000010 == 0:
+         display_menu = display_menu + 1
+         if display_menu == 3:
+             display_menu = 0 
+
+
+    #--------Buttons reading----------------
+    # using python list for storage
+    # key_trace.append(ht_1.read_key_data())
+    # key_trace = key_trace[-2:]
+
+    # # Togle state only if previosly buton state was 0
+    # # Mening botton was realeased 
+    # if key_trace[0] == 0 and key_trace[1] == 16:
+    #     display_menu = display_menu + 1
+    #     if display_menu == 3:
+    #         display_menu = 0 
 
     
     
@@ -322,7 +343,7 @@ while True:
         display_print(Font5x7, current_time[:6], show_decimal_point=True)
     #display update rate
     # display_print(Font5x7, current_time)
-        time.sleep(0.082)
+        time.sleep(0.165)
  
     if display_menu == 1:
         # display_print(Font5x7, display_string[:6])
@@ -332,6 +353,6 @@ while True:
 
     if display_menu == 2:
         display_print(Font5x7, display_string[:6], show_decimal_point=False)
-        time.sleep(0.1)
+        time.sleep(0.12)
  
 
