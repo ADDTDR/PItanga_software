@@ -19,7 +19,7 @@ def calculate_fft(data):
 
 
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 while True:
     audio_data = stream.read(CHUNK_SIZE)
