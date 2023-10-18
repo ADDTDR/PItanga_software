@@ -14,25 +14,24 @@ class HT16K33():
 
     def __init__(self, ht16k33_i2c_address):
         bus = SMBus(2)
-        #turn on oscilator 
+        #turn on oscillator 
         bus.write_byte(ht16k33_i2c_address, 0x21)
         #enable display (no blinking mode)
         bus.write_byte(ht16k33_i2c_address, 0x81)
-        #clear dispay 
+        #clear display 
         bus.write_i2c_block_data(ht16k33_i2c_address, 0x00, [0x00] * 16)
         #set brightness 0-15
         bus.write_byte(ht16k33_i2c_address, HT16K33_CMD_BRIGHTNESS | 10)
         self.ht16k33_i2c_address = ht16k33_i2c_address
         self.bus = bus
-        #grafic buffer 
+        #graphic buffer 
         self.buffer = [0x00 for x in range(0, 16)]
         #decimal point hardware limited to 1 per 3 5x7 displays sine driver support only 16 rows 
         self.decimal_dot_bit = 0
 
     def rotate_90(self, a):
         b = []
-        for k in range(0, 7):
-            #q = [(a[0] & (1 << k)) >> k , (a[1] & (1 << k)) >> k , (a[2] & (1 << k)) >> k,  (a[3] & (1 << k)) >> k,  (a[4] & (1 << k)) >> k]	
+        for k in range(0, 7):       	
             q = [(x & (1 << k)) >> k for x in a ]
             qi = 0
             for bit in q:    
@@ -42,11 +41,10 @@ class HT16K33():
 
     def clear(self):
         self.buffer = [ 0x00 for x in range(0, 16)]
-        #self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, self.buffer)
+        
 
     def read_key_data(self):
-        #read all keys
-        # key_data = self.bus.read_i2c_block_data(self.ht16k33_i2c_address, 0x40, 6)
+        # read all keys
         key_data = self.bus.read_i2c_block_data(self.ht16k33_i2c_address, 0x45, 1)
         return key_data[0]
 
@@ -55,8 +53,8 @@ class HT16K33():
         self.buffer = [0xff for x in range(0, 16)]
     
     def decimal_dot(self):
-        #first bit connected to decimal point on ltp305
-        #row 14, pin 10,  on ht16k33 
+        # first bit connected to decimal point on second display  ltp305
+        # row 15, pin 10,  on ht16k33 
         self.buffer[13] = 0xff & 0b10000000
 
 
@@ -70,7 +68,7 @@ class HT16K33():
         kx = b 
         cx = c
         
-        #push data to common raw buffer 
+        # Push data to common raw buffer 
         for e in ax:
             bx.append(e)
         for e in kx:
@@ -78,50 +76,50 @@ class HT16K33():
         for e in cx:
             bx.append(e)
 
-        #Distribute data between lines 
-        #place 3 
-        #row1
+        # Distribute data between lines 
+        # Place 3 
+        # Row1
         self.buffer[0] = bx[0] & 0x1f
-        #row2
+        # Row2
         self.buffer[2] = bx[1] & 0x1f
-        #row3
+        # Row3
         self.buffer[4] = bx[2] & 0x1f
-        #row4
+        # Row4
         self.buffer[6] = bx[3] & 0x1f
-        #row5
+        # Row5
         self.buffer[8] = bx[4] & 0x1f 
-        #row6
+        # Row6
         self.buffer[10] = bx[5] & 0x1f  
-        #row7
+        # Row7
         self.buffer[12] = bx[6] & 0x1f
-        #row8
+        # Row8
         self.buffer[14] = 0xff & 0x00 
     
-        #place 2 
-        #row 1
+        # Place 2 
+        # Row 1
         self.buffer[1] = (bx[0+7] >> 3) & 0x03
         self.buffer[0] = self.buffer[0] | (((bx[0+7] & 7) << 5)  & 0xff)
-        #row2
+        # Row2
         self.buffer[3] = (bx[1+7] >> 3) & 0x03
         self.buffer[2] = self.buffer[2] | (((bx[1+7] & 7) << 5)  & 0xff)    
-        #row3
+        # Row3
         self.buffer[5] = (bx[2+7] >> 3) & 0x03
         self.buffer[4] = self.buffer[4] | (((bx[2+7] & 7) << 5)  & 0xff)
-        #row4
+        # Row4
         self.buffer[7] = (bx[3+7] >> 3) & 0x03
         self.buffer[6] = self.buffer[6] | (((bx[3+7] & 7) << 5)  & 0xff)
-        #row5
+        # Row5
         self.buffer[9] = (bx[4+7] >> 3)& 0x03
         self.buffer[8] = self.buffer[8] | (((bx[4+7] & 7) << 5)  & 0xff)
-        #row6
+        # Row6
         self.buffer[11] = (bx[5+7] >> 3) & 0x03
         self.buffer[10] = self.buffer[10] | (((bx[5+7] & 7) << 5)  & 0xff)
-        #row7
+        # Row7
         self.buffer[13] = (bx[6+7] >> 3) & 0x03
         self.buffer[12] = self.buffer[12] | (((bx[6+7] & 7) << 5)  & 0xff)
 
 
-        #place 1
+        # Place 1
         self.buffer[1] = self.buffer[1] | (bx[0+14] & 0xff) << 2
         self.buffer[3] = self.buffer[3] | (bx[1+14] & 0xff) << 2
         self.buffer[5] = self.buffer[5] | (bx[2+14] & 0xff) << 2
@@ -131,26 +129,16 @@ class HT16K33():
         self.buffer[13] = self.buffer[13] | (bx[6+14] & 0xff) << 2
         self.buffer[15] = 0x00
 
-        #write data 
+        # Write data 
         self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, self.buffer)
 
     def write_data(self, a, b, c, show_decimal_point=False):  
         bx = []
         ax = self.rotate_90(a)
-        # ax= self.rotate_90(ax)
-        # ax= self.rotate_90(ax)
-        # ax= self.rotate_90(ax)
-
         kx = self.rotate_90(b)
-        # kx = self.rotate_90(kx)
-        # kx = self.rotate_90(kx)
-        # kx = self.rotate_90(kx)
-
         cx = self.rotate_90(c)
-        # cx = self.rotate_90(cx)
-        # cx = self.rotate_90(cx)
-        # cx = self.rotate_90(cx)
-        #push data to common raw buffer 
+        
+        # Push data to common raw buffer 
         for e in ax:
             bx.append(e)
         for e in kx:
@@ -158,8 +146,9 @@ class HT16K33():
         for e in cx:
             bx.append(e)
 
-        #Distribute data between lines 
-        #place 3 
+        # Distribute data between lines 
+        # The same as function from above 
+        # Rewrite in later revisions to 1 function  
         self.buffer[0] = bx[0] & 0x1f
         self.buffer[2] = bx[1] & 0x1f
         self.buffer[4] = bx[2] & 0x1f
@@ -258,9 +247,9 @@ def display_print(font, str_data, show_decimal_point=False):
         font[ord(str_data[3])- font_first_char],
         show_decimal_point=show_decimal_point
     )
-    #Write data  led driver
-    #Workaraund for mistake in shematic connection on ds2 
+    # Write data  led driver
     ch = [x for x in font[ord(str_data[1])- font_first_char]] #Create separate array 
+    # Work around for mistake in schematic connection on ds2
     j = ch[3]
     ch[3] = ch[4]
     ch[4] = j
@@ -272,8 +261,7 @@ def display_print(font, str_data, show_decimal_point=False):
         )
 
 
-
-def dispay_bitmap(pikachu_d):
+def display_bitmap(pikachu_d):
     pikachu_slice = pikachu_d[:7]
     
     # display data from 6 to 1
@@ -303,7 +291,6 @@ def dispay_bitmap(pikachu_d):
 
 display_string = "Motanas si Pisicuta si Catelus) "
 pikachu_d = pikachu
-show_time = True
 display_menu = 0
 
 
@@ -314,19 +301,18 @@ while True:
     # display_string = display_string 
     display_string = display_string[1:] + display_string[:1]
 
-
-    # 
+ 
     value = 1 if ht_1.read_key_data() == 16 else 0 
     #shift bits to the left 
     keys = keys << 1
-    bit_insert_possition = 0 
-    mask = 1 << bit_insert_possition
-    keys = (keys & ~mask) | ((value << bit_insert_possition) & mask)
-    #apply 4 bit mask but 2 bit are enougth do detect rising edge 
+    bit_insert_position = 0 
+    mask = 1 << bit_insert_position
+    keys = (keys & ~mask) | ((value << bit_insert_position) & mask)
+    #apply 4 bit mask but 2 bit are sufficient do detect rising edge 
     keys = keys & 0x0f 
 
-    # Togle state only if previosly buton state was 0
-    # Mening botton was realeased 
+    # Toggle state only if previously button state was 0
+    # Meaning button was released 
     if keys & 0b00000001 == 1 and keys & 0b00000010 == 0:
          display_menu = display_menu + 1
          if display_menu == 3:
@@ -338,8 +324,6 @@ while True:
     # key_trace.append(ht_1.read_key_data())
     # key_trace = key_trace[-2:]
 
-    # # Togle state only if previosly buton state was 0
-    # # Mening botton was realeased 
     # if key_trace[0] == 0 and key_trace[1] == 16:
     #     display_menu = display_menu + 1
     #     if display_menu == 3:
@@ -349,14 +333,14 @@ while True:
     
     if display_menu == 0:
         display_print(Font5x7, current_time[:6], show_decimal_point=True)
-    #display update rate
+    # display update rate
     # display_print(Font5x7, current_time)
         time.sleep(0.165)
  
     if display_menu == 1:
         # display_print(Font5x7, display_string[:6])
         pikachu_d = pikachu_d[1:] + pikachu_d[:1]
-        dispay_bitmap(pikachu_d)
+        display_bitmap(pikachu_d)
         time.sleep(0.12)
 
     if display_menu == 2:
