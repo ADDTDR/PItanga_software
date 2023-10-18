@@ -80,34 +80,43 @@ class HT16K33():
 
         #Distribute data between lines 
         #place 3 
+        #row1
         self.buffer[0] = bx[0] & 0x1f
+        #row2
         self.buffer[2] = bx[1] & 0x1f
+        #row3
         self.buffer[4] = bx[2] & 0x1f
+        #row4
         self.buffer[6] = bx[3] & 0x1f
+        #row5
         self.buffer[8] = bx[4] & 0x1f 
+        #row6
         self.buffer[10] = bx[5] & 0x1f  
+        #row7
         self.buffer[12] = bx[6] & 0x1f
+        #row8
         self.buffer[14] = 0xff & 0x00 
     
         #place 2 
+        #row 1
         self.buffer[1] = (bx[0+7] >> 3) & 0x03
         self.buffer[0] = self.buffer[0] | (((bx[0+7] & 7) << 5)  & 0xff)
-
+        #row2
         self.buffer[3] = (bx[1+7] >> 3) & 0x03
         self.buffer[2] = self.buffer[2] | (((bx[1+7] & 7) << 5)  & 0xff)    
-
+        #row3
         self.buffer[5] = (bx[2+7] >> 3) & 0x03
         self.buffer[4] = self.buffer[4] | (((bx[2+7] & 7) << 5)  & 0xff)
-
+        #row4
         self.buffer[7] = (bx[3+7] >> 3) & 0x03
         self.buffer[6] = self.buffer[6] | (((bx[3+7] & 7) << 5)  & 0xff)
-
+        #row5
         self.buffer[9] = (bx[4+7] >> 3)& 0x03
         self.buffer[8] = self.buffer[8] | (((bx[4+7] & 7) << 5)  & 0xff)
-
+        #row6
         self.buffer[11] = (bx[5+7] >> 3) & 0x03
         self.buffer[10] = self.buffer[10] | (((bx[5+7] & 7) << 5)  & 0xff)
-
+        #row7
         self.buffer[13] = (bx[6+7] >> 3) & 0x03
         self.buffer[12] = self.buffer[12] | (((bx[6+7] & 7) << 5)  & 0xff)
 
