@@ -208,18 +208,7 @@ ht_0 = HT16K33(ht16k33_i2c_address=HT16K33_ADDRESS_0)
 ht_0.clear()
 
 
-# ht_1.decimal_dot()
-# ht_1.update()
-# time.sleep(1.2)
-# ht_1.clear()
-# ht_1.update()
-# time.sleep(1.2)
-# ht_1.decimal_dot()
-# ht_1.update()
-# time.sleep(6)
-
-
-#display string 6 char
+# Display string 6 char
 def display_print(font, str_data, show_decimal_point=False):
     #Clear buffer 
     ht_1.clear()
@@ -235,8 +224,6 @@ def display_print(font, str_data, show_decimal_point=False):
         x = (128 - x) >> 7
         ht_1.decimal_dot_bit = x
 
-    # read ht16k keys
-    # ht_1.read_key_data()
 
     font_first_char = 0x20
 
@@ -300,10 +287,11 @@ while True:
     current_time = datetime.now().strftime("%H%M%S")
     # display_string = display_string 
     display_string = display_string[1:] + display_string[:1]
-
  
-    value = 1 if ht_1.read_key_data() == 16 else 0 
-    #shift bits to the left 
+    value = 1 if ht_1.read_key_data() == 16 else 0
+    # prepare key data code uses bitwise operations for reasons of use the minimal memory possible 
+    # and keep it easy portable to mcu 
+    # shift bits to the left 
     keys = keys << 1
     bit_insert_position = 0 
     mask = 1 << bit_insert_position
