@@ -13,7 +13,7 @@ HT16K33_CMD_BRIGHTNESS = 0xE0
 class HT16K33():
 
     def __init__(self, ht16k33_i2c_address):
-        bus = SMBus(2)
+        bus = SMBus(0)
         #turn on oscillator 
         bus.write_byte(ht16k33_i2c_address, 0x21)
         #enable display (no blinking mode)
@@ -271,7 +271,7 @@ class Pitanga():
             led_display_data[1],
             led_display_data[2]
         )
-        self.led_driver_1.write_data_raw(
+        self.led_driver_0.write_data_raw(
             led_display_data[3],
             led_display_data[4],
             led_display_data[5]
