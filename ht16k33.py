@@ -199,82 +199,83 @@ class HT16K33():
         self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, self.buffer)
 
 
+class Pitanga():
 
-#Initialise drivers 
-ht_1 = HT16K33(ht16k33_i2c_address=HT16K33_ADDRESS_1)
-ht_1.clear()
-
-ht_0 = HT16K33(ht16k33_i2c_address=HT16K33_ADDRESS_0)
-ht_0.clear()
-
-
-# Display string 6 char
-def display_print(font, str_data, show_decimal_point=False):
-    #Clear buffer 
-    ht_1.clear()
-    ht_0.clear()
-
-    #dot blinking invert bit 
-    if show_decimal_point:
-        x = ht_0.decimal_dot_bit 
-        x = (128 - x) >> 7
-        ht_0.decimal_dot_bit = x
-    
-        x = ht_1.decimal_dot_bit 
-        x = (128 - x) >> 7
-        ht_1.decimal_dot_bit = x
+    def __init__(self):
+        # Initialise drivers 
+        self.led_driver_1 = HT16K33(ht16k33_i2c_address=HT16K33_ADDRESS_1)
+        self.led_driver_1.clear()
+        self.led_driver_0 = HT16K33(ht16k33_i2c_address=HT16K33_ADDRESS_0)
+        self.led_driver_0.clear()
 
 
-    font_first_char = 0x20
+    # Display string 6 char
+    def display_print(self, font, str_data, show_decimal_point=False):
+        #Clear buffer 
+        self.led_driver_1.clear()
+        self.led_driver_0.clear()
 
-    #Write data  led driver 
-    ht_1.write_data(
-        font[ord(str_data[5])- font_first_char],
-        font[ord(str_data[4])- font_first_char],
-        font[ord(str_data[3])- font_first_char],
-        show_decimal_point=show_decimal_point
-    )
-    # Write data  led driver
-    ch = [x for x in font[ord(str_data[1])- font_first_char]] #Create separate array 
-    # Work around for mistake in schematic connection on ds2
-    j = ch[3]
-    ch[3] = ch[4]
-    ch[4] = j
-    ht_0.write_data(
-        font[ord(str_data[2])- font_first_char],
-        ch,
-        font[ord(str_data[0])- font_first_char],
-        show_decimal_point=show_decimal_point
+        #dot blinking invert bit 
+        if show_decimal_point:
+            x = self.led_driver_0.decimal_dot_bit 
+            x = (128 - x) >> 7
+            self.led_driver_0.decimal_dot_bit = x
+        
+            x = self.led_driver_1.decimal_dot_bit 
+            x = (128 - x) >> 7
+            self.led_driver_1.decimal_dot_bit = x
+
+
+        font_first_char = 0x20
+
+        #Write data  led driver 
+        self.led_driver_1.write_data(
+            font[ord(str_data[5])- font_first_char],
+            font[ord(str_data[4])- font_first_char],
+            font[ord(str_data[3])- font_first_char],
+            show_decimal_point=show_decimal_point
         )
+        # Write data  led driver
+        ch = [x for x in font[ord(str_data[1])- font_first_char]] #Create separate array 
+        # Work around for mistake in schematic connection on ds2
+        j = ch[3]
+        ch[3] = ch[4]
+        ch[4] = j
+        self.led_driver_0.write_data(
+            font[ord(str_data[2])- font_first_char],
+            ch,
+            font[ord(str_data[0])- font_first_char],
+            show_decimal_point=show_decimal_point
+            )
 
 
-def display_bitmap(pikachu_d):
-    pikachu_slice = pikachu_d[:7]
-    
-    # display data from 6 to 1
-    led_display_data = []
-    for x in range(0, 30, 5):
-        # start from first line to the end 
-        char = []
-        for line in pikachu_slice:               
-            char_line = line[:-x] if x > 0 else line
-            char_line = char_line[25-x:]
-            char.append(int("".join(str(x) for x in char_line), 2))
-        led_display_data.append(char)
+    def display_bitmap(self, pikachu_d):
+        pikachu_slice = pikachu_d[:7]
+        
+        # Display data from 6 to 1
+        led_display_data = []
+        for x in range(0, 30, 5):
+            # Start from first line to the end 
+            char = []
+            for line in pikachu_slice:               
+                char_line = line[:-x] if x > 0 else line
+                char_line = char_line[25-x:]
+                char.append(int("".join(str(x) for x in char_line), 2))
+            led_display_data.append(char)
 
-    
-    ht_1.clear()
-    ht_0.clear()
-    ht_1.write_data_raw(
-        led_display_data[0],
-        led_display_data[1],
-        led_display_data[2]
-    )
-    ht_0.write_data_raw(
-        led_display_data[3],
-        led_display_data[4],
-        led_display_data[5]
-    )
+        
+        self.led_driver_1.clear()
+        self.led_driver_0.clear()
+        self.led_driver_1.write_data_raw(
+            led_display_data[0],
+            led_display_data[1],
+            led_display_data[2]
+        )
+        self.led_driver_1.write_data_raw(
+            led_display_data[3],
+            led_display_data[4],
+            led_display_data[5]
+        )
 
 display_string = "Motanas si Pisicuta si Catelus) "
 pikachu_d = pikachu
@@ -282,13 +283,15 @@ display_menu = 0
 
 
 keys = 0b0000
+pitanga  = Pitanga()
+
 while True:
     
     current_time = datetime.now().strftime("%H%M%S")
     # display_string = display_string 
     display_string = display_string[1:] + display_string[:1]
  
-    value = 1 if ht_1.read_key_data() == 16 else 0
+    value = 1 if pitanga.led_driver_1.read_key_data() == 16 else 0
     # prepare key data code uses bitwise operations for reasons of use the minimal memory possible 
     # and keep it easy portable to mcu 
     # shift bits to the left 
@@ -306,33 +309,21 @@ while True:
          if display_menu == 3:
              display_menu = 0 
 
-
-    #--------Buttons reading----------------
-    # using python list for storage
-    # key_trace.append(ht_1.read_key_data())
-    # key_trace = key_trace[-2:]
-
-    # if key_trace[0] == 0 and key_trace[1] == 16:
-    #     display_menu = display_menu + 1
-    #     if display_menu == 3:
-    #         display_menu = 0 
-
     
     
     if display_menu == 0:
-        display_print(Font5x7, current_time[:6], show_decimal_point=True)
+        pitanga.display_print(Font5x7, current_time[:6], show_decimal_point=True)
     # display update rate
-    # display_print(Font5x7, current_time)
         time.sleep(0.165)
  
     if display_menu == 1:
         # display_print(Font5x7, display_string[:6])
         pikachu_d = pikachu_d[1:] + pikachu_d[:1]
-        display_bitmap(pikachu_d)
+        pitanga.display_bitmap(pikachu_d)
         time.sleep(0.12)
 
     if display_menu == 2:
-        display_print(Font5x7, display_string[:6], show_decimal_point=False)
+        pitanga.display_print(Font5x7, display_string[:6], show_decimal_point=False)
         time.sleep(0.12)
  
 
