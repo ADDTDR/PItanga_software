@@ -7,27 +7,33 @@ from pikachu import pikachu as pikachu_bitmap
 
 HT16K33_ADDRESS_1 = 0x71
 HT16K33_ADDRESS_0 = 0x70
-HT16K33_CMD_BRIGHTNESS = 0xE0
 
+HT16K33_CMD_BRIGHTNESS = 0xE0
+LED_DRIVER_BRIGHTNESS_LEVEL = 2
+HT16K33_ENABLE_DISPLAY = 0x81
+HT16K33_TURN_ON_OSCILLATOR = 0x21
 
 class HT16K33():
 
     def __init__(self, ht16k33_i2c_address):
         bus = SMBus(2)
         # Turn on oscillator 
-        bus.write_byte(ht16k33_i2c_address, 0x21)
+        bus.write_byte(ht16k33_i2c_address, HT16K33_TURN_ON_OSCILLATOR)
         # Enable display (no blinking mode)
-        bus.write_byte(ht16k33_i2c_address, 0x81)
+        bus.write_byte(ht16k33_i2c_address, HT16K33_ENABLE_DISPLAY)
         # Clear display 
         bus.write_i2c_block_data(ht16k33_i2c_address, 0x00, [0x00] * 16)
         # Set brightness 0-15
-        bus.write_byte(ht16k33_i2c_address, HT16K33_CMD_BRIGHTNESS | 5)
+        bus.write_byte(ht16k33_i2c_address, HT16K33_CMD_BRIGHTNESS | LED_DRIVER_BRIGHTNESS_LEVEL)
         self.ht16k33_i2c_address = ht16k33_i2c_address
         self.bus = bus
         # Graphic buffer 
         self.buffer = [0x00 for x in range(0, 16)]
         # Decimal point hardware limited to 1 per 3 5x7 displays sine driver support only 16 rows 
         self.decimal_dot_bit = 0
+
+    def set_brightness(self, led_driver_brightness_level):
+        self.bus.write_byte(self.ht16k33_i2c_address, HT16K33_CMD_BRIGHTNESS | led_driver_brightness_level)
 
     def rotate_90(self, a):
         b = []
@@ -277,7 +283,7 @@ class Pitanga():
             led_display_data[5]
         )
 
-display_string = "Motanas si Pisicuta si Catelus) "
+display_string = "Motanas si Pisicuta ) "
 pikachu_d = pikachu_bitmap
 display_menu = 0
 
