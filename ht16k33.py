@@ -13,7 +13,7 @@ HT16K33_CMD_BRIGHTNESS = 0xE0
 class HT16K33():
 
     def __init__(self, ht16k33_i2c_address):
-        bus = SMBus(0)
+        bus = SMBus(2)
         # Turn on oscillator 
         bus.write_byte(ht16k33_i2c_address, 0x21)
         # Enable display (no blinking mode)
@@ -21,7 +21,7 @@ class HT16K33():
         # Clear display 
         bus.write_i2c_block_data(ht16k33_i2c_address, 0x00, [0x00] * 16)
         # Set brightness 0-15
-        bus.write_byte(ht16k33_i2c_address, HT16K33_CMD_BRIGHTNESS | 10)
+        bus.write_byte(ht16k33_i2c_address, HT16K33_CMD_BRIGHTNESS | 5)
         self.ht16k33_i2c_address = ht16k33_i2c_address
         self.bus = bus
         # Graphic buffer 

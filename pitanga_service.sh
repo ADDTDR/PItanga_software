@@ -1,0 +1,1 @@
+sudo /usr/bin/python3 /home/ad/mdlh_ht16k33_python/ht16k33.py
