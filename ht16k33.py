@@ -14,19 +14,19 @@ class HT16K33():
 
     def __init__(self, ht16k33_i2c_address):
         bus = SMBus(0)
-        #turn on oscillator 
+        # Turn on oscillator 
         bus.write_byte(ht16k33_i2c_address, 0x21)
-        #enable display (no blinking mode)
+        # Enable display (no blinking mode)
         bus.write_byte(ht16k33_i2c_address, 0x81)
-        #clear display 
+        # Clear display 
         bus.write_i2c_block_data(ht16k33_i2c_address, 0x00, [0x00] * 16)
-        #set brightness 0-15
+        # Set brightness 0-15
         bus.write_byte(ht16k33_i2c_address, HT16K33_CMD_BRIGHTNESS | 10)
         self.ht16k33_i2c_address = ht16k33_i2c_address
         self.bus = bus
-        #graphic buffer 
+        # Graphic buffer 
         self.buffer = [0x00 for x in range(0, 16)]
-        #decimal point hardware limited to 1 per 3 5x7 displays sine driver support only 16 rows 
+        # Decimal point hardware limited to 1 per 3 5x7 displays sine driver support only 16 rows 
         self.decimal_dot_bit = 0
 
     def rotate_90(self, a):
@@ -53,8 +53,8 @@ class HT16K33():
         self.buffer = [0xff for x in range(0, 16)]
     
     def decimal_dot(self):
-        # first bit connected to decimal point on second display  ltp305
-        # row 15, pin 10,  on ht16k33 
+        # First bit connected to decimal point on second display  ltp305
+        # Row 15, pin 10,  on ht16k33 
         self.buffer[13] = 0xff & 0b10000000
 
 
@@ -288,13 +288,13 @@ pitanga  = Pitanga()
 while True:
     
     current_time = datetime.now().strftime("%H%M%S")
-    # display_string = display_string 
+    # Display_string = display_string 
     display_string = display_string[1:] + display_string[:1]
  
     value = 1 if pitanga.led_driver_1.read_key_data() == 16 else 0
-    # prepare key data code uses bitwise operations for reasons of use the minimal memory possible 
+    # Prepare key data code uses bitwise operations for reasons of use the minimal memory possible 
     # and keep it easy portable to mcu 
-    # shift bits to the left 
+    # Shift bits to the left 
     keys = keys << 1
     bit_insert_position = 0 
     mask = 1 << bit_insert_position
