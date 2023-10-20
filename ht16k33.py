@@ -2,7 +2,7 @@ from smbus import SMBus
 import time
 from font5x7 import Font5x7_full as Font5x7
 from datetime import datetime
-from pikachu import pikachu
+from pikachu import pikachu as pikachu_bitmap
 
 
 HT16K33_ADDRESS_1 = 0x71
@@ -278,10 +278,10 @@ class Pitanga():
         )
 
 display_string = "Motanas si Pisicuta si Catelus) "
-pikachu_d = pikachu
+pikachu_d = pikachu_bitmap
 display_menu = 0
 
-
+#Keys variable replace array with a integer value
 keys = 0b0000
 pitanga  = Pitanga()
 
@@ -294,8 +294,10 @@ while True:
     value = 1 if pitanga.led_driver_1.read_key_data() == 16 else 0
     # Prepare key data code uses bitwise operations for reasons of use the minimal memory possible 
     # and keep it easy portable to mcu 
-    # Shift bits to the left 
+    # Shift bits to the left of an integer instead of using separate element of an array to store button value 
+
     keys = keys << 1
+    # Bit insert position 0 indicates to insert value in the lsb place 
     bit_insert_position = 0 
     mask = 1 << bit_insert_position
     keys = (keys & ~mask) | ((value << bit_insert_position) & mask)
@@ -304,6 +306,7 @@ while True:
 
     # Toggle state only if previously button state was 0
     # Meaning button was released 
+    # check bit position 0 and 1 of integer value, detecting rising edge condition 
     if keys & 0b00000001 == 1 and keys & 0b00000010 == 0:
          display_menu = display_menu + 1
          if display_menu == 3:
@@ -326,4 +329,3 @@ while True:
         pitanga.display_print(Font5x7, display_string[:6], show_decimal_point=False)
         time.sleep(0.12)
  
-
