@@ -296,7 +296,7 @@ display_menu = 3
 # Keys variable replace array with a integer value
 keys = 0b0000
 pitanga  = Pitanga()
-decimal_dots = 0b00000010
+decimal_dots = 0b00001010
 # Dots  will alternate between values
 decimal_dots_time_patterns = [0b00001010, 0b00000000]
 
