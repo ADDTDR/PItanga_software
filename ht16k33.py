@@ -133,7 +133,7 @@ class HT16K33():
         self.buffer[9] = self.buffer[9] | (bx[4+14] & 0xff) << 2
         self.buffer[11] = self.buffer[11] | (bx[5+14] & 0xff) << 2
         self.buffer[13] = self.buffer[13] | (bx[6+14] & 0xff) << 2
-        self.buffer[15] = 0x00
+        self.buffer[15] = self.buffer[15] | (bx[6+14] & 0xff) << 2
 
         # Write data 
         self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, self.buffer)
@@ -155,6 +155,7 @@ class HT16K33():
         # Distribute data between lines 
         # The same as function from above 
         # Rewrite in later revisions to 1 function  
+        # Display module 3
         self.buffer[0] = bx[0] & 0x1f
         self.buffer[2] = bx[1] & 0x1f
         self.buffer[4] = bx[2] & 0x1f
@@ -164,7 +165,7 @@ class HT16K33():
         self.buffer[12] = bx[6] & 0x1f
         self.buffer[14] = 0x00
     
-        #place 2 
+        #Display module 2 
         self.buffer[1] = (bx[0+7] >> 3) & 0x03
         self.buffer[0] = self.buffer[0] | (((bx[0+7] & 7) << 5)  & 0xff)
 
@@ -187,7 +188,7 @@ class HT16K33():
         self.buffer[12] = self.buffer[12] | (((bx[6+7] & 7) << 5)  & 0xff)
 
 
-        #place 1
+        # Display module 1
         self.buffer[1] = self.buffer[1] | (bx[0+14] & 0xff) << 2
         self.buffer[3] = self.buffer[3] | (bx[1+14] & 0xff) << 2
         self.buffer[5] = self.buffer[5] | (bx[2+14] & 0xff) << 2
@@ -195,11 +196,17 @@ class HT16K33():
         self.buffer[9] = self.buffer[9] | (bx[4+14] & 0xff) << 2
         self.buffer[11] = self.buffer[11] | (bx[5+14] & 0xff) << 2
         self.buffer[13] = self.buffer[13] | (bx[6+14] & 0xff) << 2
-        self.buffer[15] = 0x00
+        # Copy the same data in row8 as in row7 used to commute anode 15 between 2 display modules
+        # The same colum  is distributed between Display module 1 and display module 2 on different catode signal  
+        self.buffer[15] = self.buffer[15] | (bx[6+14] & 0xff) << 2
 
         #place decimal dot 
         if show_decimal_point:
+            # Put Dot on display module 2 
             self.buffer[13] = self.buffer[13] | self.decimal_dot_bit << 7
+            # Put dot on display module 1
+            self.buffer[15] = self.buffer[15] | ~ self.decimal_dot_bit << 7
+
 
         #write data 
         self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, self.buffer)
