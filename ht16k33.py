@@ -3,6 +3,7 @@ import time
 from font5x7 import Font5x7_full as Font5x7
 from datetime import datetime
 from pikachu import pikachu as pikachu_bitmap
+from bluetooth_bitmap import bluetooth_bitmap
 
 
 HT16K33_ADDRESS_1 = 0x71
@@ -259,16 +260,16 @@ class Pitanga():
             )
 
 
-    def display_bitmap(self, pikachu_d):
+    def display_bitmap(self, bitmap):
         # Slice 7 lines hight 
-        pikachu_slice = pikachu_d[:7]
+        bitmap_slice = bitmap[:7]
         
         # Display data from 6 to 1
         led_display_data = []
         for x in range(0, 30, 5):
             # Start from first line to the end 
             char = []
-            for line in pikachu_slice:               
+            for line in bitmap_slice:               
                 char_line = line[:-x] if x > 0 else line
                 char_line = char_line[25-x:]
                 char.append(int("".join(str(x) for x in char_line), 2))
@@ -326,7 +327,8 @@ while True:
     # check bit position 0 and 1 of integer value, detecting rising edge condition 
     if keys & 0b00000001 == 1 and keys & 0b00000010 == 0:
          display_menu = display_menu + 1
-         if display_menu == 4:
+         # Simple menu state machine flag 
+         if display_menu == 5:
              display_menu = 0 
 
     
@@ -356,3 +358,8 @@ while True:
         decimal_dots = circular_left_rotate(decimal_dots, 1, 8)
         pitanga.display_print(Font5x7, '      ', show_decimals=True, decimal_dots=decimal_dots)
         time.sleep(0.045)
+    
+    if display_menu == 4:
+        bluetooth_bitmap = bluetooth_bitmap[1:] + bluetooth_bitmap[:1]
+        pitanga.display_bitmap(bluetooth_bitmap)
+        time.sleep(0.1)
