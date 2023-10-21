@@ -9,9 +9,9 @@ HT16K33_ADDRESS_1 = 0x71
 HT16K33_ADDRESS_0 = 0x70
 
 HT16K33_CMD_BRIGHTNESS = 0xE0
-LED_DRIVER_BRIGHTNESS_LEVEL = 2
 HT16K33_ENABLE_DISPLAY = 0x81
 HT16K33_TURN_ON_OSCILLATOR = 0x21
+LED_DRIVER_BRIGHTNESS_LEVEL = 2
 
 class HT16K33():
 
@@ -138,7 +138,7 @@ class HT16K33():
         # Write data 
         self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, self.buffer)
 
-    def write_data(self, a, b, c, show_decimal_point=False):  
+    def write_data(self, a, b, c, show_decimals=False, decimal_dots=0x00):  
         bx = []
         ax = self.rotate_90(a)
         kx = self.rotate_90(b)
@@ -201,11 +201,16 @@ class HT16K33():
         self.buffer[15] = self.buffer[15] | (bx[6+14] & 0xff) << 2
 
         #place decimal dot 
-        if show_decimal_point:
-            # Put Dot on display module 2 
-            self.buffer[13] = self.buffer[13] | self.decimal_dot_bit << 7
-            # Put dot on display module 1
-            self.buffer[15] = self.buffer[15] | ~ self.decimal_dot_bit << 7
+        if show_decimals:
+
+            # Put dot on first display module for led driver 2
+            self.buffer[15] = self.buffer[15] | (decimal_dots & 0b00000100) << 5
+            # Put dot on second display module for led driver 2
+            self.buffer[13] = self.buffer[13] | (decimal_dots & 0b00000010) << 6
+
+            # Put dot on third display module for led driver 1
+            self.buffer[13] = self.buffer[13] | (decimal_dots & 0b00001000) << 4
+
 
 
         #write data 
@@ -223,20 +228,10 @@ class Pitanga():
 
 
     # Display string 6 char
-    def display_print(self, font, str_data, show_decimal_point=False):
+    def display_print(self, font, str_data, show_decimals=False, decimal_dots=0x00):
         #Clear buffer 
         self.led_driver_1.clear()
         self.led_driver_0.clear()
-
-        #dot blinking invert bit 
-        if show_decimal_point:
-            x = self.led_driver_0.decimal_dot_bit 
-            x = (128 - x) >> 7
-            self.led_driver_0.decimal_dot_bit = x
-        
-            x = self.led_driver_1.decimal_dot_bit 
-            x = (128 - x) >> 7
-            self.led_driver_1.decimal_dot_bit = x
 
 
         font_first_char = 0x20
@@ -246,7 +241,8 @@ class Pitanga():
             font[ord(str_data[5])- font_first_char],
             font[ord(str_data[4])- font_first_char],
             font[ord(str_data[3])- font_first_char],
-            show_decimal_point=show_decimal_point
+            show_decimals=show_decimals,
+            decimal_dots = decimal_dots & 0b00000110
         )
         # Write data  led driver
         ch = [x for x in font[ord(str_data[1])- font_first_char]] #Create separate array 
@@ -258,11 +254,13 @@ class Pitanga():
             font[ord(str_data[2])- font_first_char],
             ch,
             font[ord(str_data[0])- font_first_char],
-            show_decimal_point=show_decimal_point
+            show_decimals=show_decimals,
+            decimal_dots = decimal_dots  & 0b00011000
             )
 
 
     def display_bitmap(self, pikachu_d):
+        # Slice 7 lines hight 
         pikachu_slice = pikachu_d[:7]
         
         # Display data from 6 to 1
@@ -292,17 +290,23 @@ class Pitanga():
 
 display_string = "Motanas si Pisicuta ) "
 pikachu_d = pikachu_bitmap
-display_menu = 0
+display_menu = 3
 
-#Keys variable replace array with a integer value
+# Keys variable replace array with a integer value
 keys = 0b0000
 pitanga  = Pitanga()
+decimal_dots = 0b00000010
+# Dots  will alternate between values
+decimal_dots_time_patterns = [0b00001010, 0b00000000]
+
+def circular_left_rotate(num, shift, num_bits=8):
+    shift %= num_bits
+    return ((num << shift) | (num >> (num_bits - shift))) & ((1 << num_bits) - 1)
 
 while True:
     
     current_time = datetime.now().strftime("%H%M%S")
     # Display_string = display_string 
-    display_string = display_string[1:] + display_string[:1]
  
     value = 1 if pitanga.led_driver_1.read_key_data() == 16 else 0
     # Prepare key data code uses bitwise operations for reasons of use the minimal memory possible 
@@ -322,23 +326,33 @@ while True:
     # check bit position 0 and 1 of integer value, detecting rising edge condition 
     if keys & 0b00000001 == 1 and keys & 0b00000010 == 0:
          display_menu = display_menu + 1
-         if display_menu == 3:
+         if display_menu == 4:
              display_menu = 0 
 
     
     
     if display_menu == 0:
-        pitanga.display_print(Font5x7, current_time[:6], show_decimal_point=True)
-    # display update rate
-        time.sleep(0.165)
+        # Show time 
+        # Circular rotate decimals pattern 
+        decimal_dots_time_patterns =  decimal_dots_time_patterns[1:] + decimal_dots_time_patterns[:1]
+        pitanga.display_print(Font5x7, current_time[:6], show_decimals=True, decimal_dots=decimal_dots_time_patterns[0])
+        time.sleep(0.12)
  
     if display_menu == 1:
+        # Show bitmap 
         # display_print(Font5x7, display_string[:6])
         pikachu_d = pikachu_d[1:] + pikachu_d[:1]
         pitanga.display_bitmap(pikachu_d)
         time.sleep(0.12)
 
     if display_menu == 2:
-        pitanga.display_print(Font5x7, display_string[:6], show_decimal_point=False)
+        # Show text 
+        display_string = display_string[1:] + display_string[:1]
+        pitanga.display_print(Font5x7, display_string[:6], show_decimals=False)
         time.sleep(0.12)
  
+    if display_menu == 3:
+        # Show running dots 
+        decimal_dots = circular_left_rotate(decimal_dots, 1, 8)
+        pitanga.display_print(Font5x7, '      ', show_decimals=True, decimal_dots=decimal_dots)
+        time.sleep(0.045)
