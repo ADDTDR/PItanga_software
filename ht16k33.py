@@ -291,7 +291,7 @@ class Pitanga():
 
 display_string = "Motanas si Pisicuta ) "
 pikachu_d = pikachu_bitmap
-display_menu = 3
+display_menu = 0
 
 # Keys variable replace array with a integer value
 keys = 0b0000
@@ -328,7 +328,7 @@ while True:
     if keys & 0b00000001 == 1 and keys & 0b00000010 == 0:
          display_menu = display_menu + 1
          # Simple menu state machine flag 
-         if display_menu == 5:
+         if display_menu == 4:
              display_menu = 0 
 
     
@@ -340,11 +340,16 @@ while True:
         pitanga.display_print(Font5x7, current_time[:6], show_decimals=True, decimal_dots=decimal_dots_time_patterns[0])
         time.sleep(0.12)
  
+    # if display_menu == 1:
+    #     # Show bitmap 
+    #     # display_print(Font5x7, display_string[:6])
+    #     pikachu_d = pikachu_d[1:] + pikachu_d[:1]
+    #     pitanga.display_bitmap(pikachu_d)
+    #     time.sleep(0.12)
+
     if display_menu == 1:
-        # Show bitmap 
-        # display_print(Font5x7, display_string[:6])
-        pikachu_d = pikachu_d[1:] + pikachu_d[:1]
-        pitanga.display_bitmap(pikachu_d)
+        bluetooth_bitmap = bluetooth_bitmap[1:] + bluetooth_bitmap[:1]
+        pitanga.display_bitmap(bluetooth_bitmap)
         time.sleep(0.12)
 
     if display_menu == 2:
@@ -357,9 +362,5 @@ while True:
         # Show running dots 
         decimal_dots = circular_left_rotate(decimal_dots, 1, 8)
         pitanga.display_print(Font5x7, '      ', show_decimals=True, decimal_dots=decimal_dots)
-        time.sleep(0.045)
+        time.sleep(0.12)
     
-    if display_menu == 4:
-        bluetooth_bitmap = bluetooth_bitmap[1:] + bluetooth_bitmap[:1]
-        pitanga.display_bitmap(bluetooth_bitmap)
-        time.sleep(0.1)
