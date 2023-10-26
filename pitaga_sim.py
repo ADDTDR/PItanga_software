@@ -5,7 +5,7 @@ import numpy as np
 COLOR_GRID = (40, 40, 40)
 COLOR_ACTIVE = (106, 215, 90)
 COLOR_PASSIVE = (4, 12, 5)
-CELL_PX_SIZE = 10
+CELL_PX_SIZE = 15
 
 def main():
     pygame.init()
@@ -26,7 +26,7 @@ def main():
                         ]
                         )
     pos = (0, 0)
-    # cells[pos[0]:pos[0]+pattern.shape[0], pos[1]:pos[1]+pattern.shape[1]] = pattern
+    cells[pos[0]:pos[0]+pattern.shape[0], pos[1]:pos[1]+pattern.shape[1]] = pattern
 
     for row, col in np.ndindex(cells.shape):
         color = COLOR_ACTIVE if cells[row, col] == 1 else COLOR_PASSIVE
