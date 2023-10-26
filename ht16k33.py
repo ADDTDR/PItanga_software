@@ -234,10 +234,9 @@ class Pitanga():
         self.led_driver_1.clear()
         self.led_driver_0.clear()
 
-
         font_first_char = 0x20
 
-        #Write data  led driver 
+        #Write data  led driver 1
         self.led_driver_1.write_data(
             font[ord(str_data[5])- font_first_char],
             font[ord(str_data[4])- font_first_char],
@@ -245,7 +244,8 @@ class Pitanga():
             show_decimals=show_decimals,
             decimal_dots = decimal_dots & 0b00000110
         )
-        # Write data  led driver
+        
+        # Write data  led driver 0 
         ch = [x for x in font[ord(str_data[1])- font_first_char]] #Create separate array 
         # Work around for mistake in schematic connection on ds2
         j = ch[3]
