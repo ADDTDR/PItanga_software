@@ -12,7 +12,7 @@ HT16K33_ADDRESS_0 = 0x70
 HT16K33_CMD_BRIGHTNESS = 0xE0
 HT16K33_ENABLE_DISPLAY = 0x81
 HT16K33_TURN_ON_OSCILLATOR = 0x21
-LED_DRIVER_BRIGHTNESS_LEVEL = 2
+LED_DRIVER_BRIGHTNESS_LEVEL = 15
 
 class HT16K33():
 
@@ -52,8 +52,8 @@ class HT16K33():
 
     def read_key_data(self):
         # read all keys
-        key_data = self.bus.read_i2c_block_data(self.ht16k33_i2c_address, 0x45, 1)
-        return key_data[0]
+        key_data = self.bus.read_i2c_block_data(self.ht16k33_i2c_address, 0x40, 5)
+        return key_data[4]
 
 
     def fill(self):
@@ -247,10 +247,6 @@ class Pitanga():
         
         # Write data  led driver 0 
         ch = [x for x in font[ord(str_data[1])- font_first_char]] #Create separate array 
-        # Work around for mistake in schematic connection on ds2
-        j = ch[3]
-        ch[3] = ch[4]
-        ch[4] = j
         self.led_driver_0.write_data(
             font[ord(str_data[2])- font_first_char],
             ch,
@@ -306,7 +302,7 @@ def circular_left_rotate(num, shift, num_bits=8):
 
 while True:
     
-    current_time = datetime.now().strftime("%H%M%S")
+    current_time = datetime.now().strftime("%H%M%SS")
     # Display_string = display_string 
  
     value = 1 if pitanga.led_driver_1.read_key_data() == 16 else 0
@@ -336,8 +332,8 @@ while True:
     if display_menu == 0:
         # Show time 
         # Circular rotate decimals pattern 
-        decimal_dots_time_patterns =  decimal_dots_time_patterns[1:] + decimal_dots_time_patterns[:1]
-        pitanga.display_print(Font5x7, current_time[:6], show_decimals=True, decimal_dots=decimal_dots_time_patterns[0])
+        # decimal_dots_time_patterns =  decimal_dots_time_patterns[1:] + decimal_dots_time_patterns[:1]
+        pitanga.display_print(Font5x7, current_time[:6], show_decimals=False, decimal_dots=0xf00)
         time.sleep(0.12)
  
     # if display_menu == 1:
