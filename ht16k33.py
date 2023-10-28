@@ -284,79 +284,81 @@ class Pitanga():
             led_display_data[4],
             led_display_data[5]
         )
+def main():
+    display_string = "Motanas si Pisicuta ) "
+    pikachu_d = pikachu_bitmap
+    display_menu = 0
 
-display_string = "Motanas si Pisicuta ) "
-pikachu_d = pikachu_bitmap
-display_menu = 0
+    # Keys variable replace array with a integer value
+    keys = 0b0000
+    pitanga  = Pitanga()
+    decimal_dots = 0b00001010
+    # Dots  will alternate between values
+    decimal_dots_time_patterns = [0b00001010, 0b00000000]
 
-# Keys variable replace array with a integer value
-keys = 0b0000
-pitanga  = Pitanga()
-decimal_dots = 0b00001010
-# Dots  will alternate between values
-decimal_dots_time_patterns = [0b00001010, 0b00000000]
+    def circular_left_rotate(num, shift, num_bits=8):
+        shift %= num_bits
+        return ((num << shift) | (num >> (num_bits - shift))) & ((1 << num_bits) - 1)
 
-def circular_left_rotate(num, shift, num_bits=8):
-    shift %= num_bits
-    return ((num << shift) | (num >> (num_bits - shift))) & ((1 << num_bits) - 1)
-
-while True:
+    while True:
+        
+        current_time = datetime.now().strftime("%H%M%SS")
+        # Display_string = display_string 
     
-    current_time = datetime.now().strftime("%H%M%SS")
-    # Display_string = display_string 
- 
-    value = 1 if pitanga.led_driver_1.read_key_data() == 16 else 0
-    # Prepare key data code uses bitwise operations for reasons of use the minimal memory possible 
-    # and keep it easy portable to mcu 
-    # Shift bits to the left of an integer instead of using separate element of an array to store button value 
+        value = 1 if pitanga.led_driver_1.read_key_data() == 16 else 0
+        # Prepare key data code uses bitwise operations for reasons of use the minimal memory possible 
+        # and keep it easy portable to mcu 
+        # Shift bits to the left of an integer instead of using separate element of an array to store button value 
 
-    keys = keys << 1
-    # Bit insert position 0 indicates to insert value in the lsb place 
-    bit_insert_position = 0 
-    mask = 1 << bit_insert_position
-    keys = (keys & ~mask) | ((value << bit_insert_position) & mask)
-    #apply 4 bit mask but 2 bit are sufficient do detect rising edge 
-    keys = keys & 0x0f 
+        keys = keys << 1
+        # Bit insert position 0 indicates to insert value in the lsb place 
+        bit_insert_position = 0 
+        mask = 1 << bit_insert_position
+        keys = (keys & ~mask) | ((value << bit_insert_position) & mask)
+        #apply 4 bit mask but 2 bit are sufficient do detect rising edge 
+        keys = keys & 0x0f 
 
-    # Toggle state only if previously button state was 0
-    # Meaning button was released 
-    # check bit position 0 and 1 of integer value, detecting rising edge condition 
-    if keys & 0b00000001 == 1 and keys & 0b00000010 == 0:
-         display_menu = display_menu + 1
-         # Simple menu state machine flag 
-         if display_menu == 4:
-             display_menu = 0 
+        # Toggle state only if previously button state was 0
+        # Meaning button was released 
+        # check bit position 0 and 1 of integer value, detecting rising edge condition 
+        if keys & 0b00000001 == 1 and keys & 0b00000010 == 0:
+            display_menu = display_menu + 1
+            # Simple menu state machine flag 
+            if display_menu == 4:
+                display_menu = 0 
 
+        
+        
+        if display_menu == 0:
+            # Show time 
+            # Circular rotate decimals pattern 
+            # decimal_dots_time_patterns =  decimal_dots_time_patterns[1:] + decimal_dots_time_patterns[:1]
+            pitanga.display_print(Font5x7, current_time[:6], show_decimals=False, decimal_dots=0xf00)
+            time.sleep(0.12)
     
-    
-    if display_menu == 0:
-        # Show time 
-        # Circular rotate decimals pattern 
-        # decimal_dots_time_patterns =  decimal_dots_time_patterns[1:] + decimal_dots_time_patterns[:1]
-        pitanga.display_print(Font5x7, current_time[:6], show_decimals=False, decimal_dots=0xf00)
-        time.sleep(0.12)
- 
-    # if display_menu == 1:
-    #     # Show bitmap 
-    #     # display_print(Font5x7, display_string[:6])
-    #     pikachu_d = pikachu_d[1:] + pikachu_d[:1]
-    #     pitanga.display_bitmap(pikachu_d)
-    #     time.sleep(0.12)
+        if display_menu == 1:
+            # Show bitmap 
+            # display_print(Font5x7, display_string[:6])
+            pikachu_d = pikachu_d[1:] + pikachu_d[:1]
+            pitanga.display_bitmap(pikachu_d)
+            time.sleep(0.1)
 
-    if display_menu == 1:
-        bluetooth_bitmap = bluetooth_bitmap[1:] + bluetooth_bitmap[:1]
-        pitanga.display_bitmap(bluetooth_bitmap)
-        time.sleep(0.12)
+        # if display_menu == 1:
+        #     bluetooth_bitmap = bluetooth_bitmap[1:] + bluetooth_bitmap[:1]
+        #     pitanga.display_bitmap(bluetooth_bitmap)
+        #     time.sleep(0.1)
 
-    if display_menu == 2:
-        # Show text 
-        display_string = display_string[1:] + display_string[:1]
-        pitanga.display_print(Font5x7, display_string[:6], show_decimals=False)
-        time.sleep(0.12)
- 
-    if display_menu == 3:
-        # Show running dots 
-        decimal_dots = circular_left_rotate(decimal_dots, 1, 8)
-        pitanga.display_print(Font5x7, '      ', show_decimals=True, decimal_dots=decimal_dots)
-        time.sleep(0.12)
+        if display_menu == 2:
+            # Show text 
+            display_string = display_string[1:] + display_string[:1]
+            pitanga.display_print(Font5x7, display_string[:6], show_decimals=False)
+            time.sleep(0.12)
     
+        if display_menu == 3:
+            # Show running dots 
+            decimal_dots = circular_left_rotate(decimal_dots, 1, 8)
+            pitanga.display_print(Font5x7, '      ', show_decimals=True, decimal_dots=decimal_dots)
+            time.sleep(0.12)
+        
+if __name__ == '__main__':
+    main()
