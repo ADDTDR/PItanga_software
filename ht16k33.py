@@ -301,7 +301,6 @@ def main():
                 counter = 0
                 display_string = random.choice(lines)
                 display_string = display_string.replace('\n', '')
-                print(display_string)
             counter = counter + 1
 
         if display_menu == 3:
