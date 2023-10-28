@@ -1,5 +1,6 @@
 from smbus import SMBus
 import time
+import random 
 from font5x7 import Font5x7_full as Font5x7
 from datetime import datetime
 from pikachu import pikachu as pikachu_bitmap
@@ -12,6 +13,8 @@ HT16K33_CMD_BRIGHTNESS = 0xE0
 HT16K33_ENABLE_DISPLAY = 0x81
 HT16K33_TURN_ON_OSCILLATOR = 0x21
 LED_DRIVER_BRIGHTNESS_LEVEL = 15
+
+JOKES_FILE = 'jokes.txt'
 
 class HT16K33():
 
@@ -223,9 +226,17 @@ class Pitanga():
 
 
 def main():
-    display_string = "Motanas si Pisicuta ) "
+
+    with open(JOKES_FILE, 'r') as file:
+        # Read all the lines into a list
+        lines = file.readlines()
+
+    display_string = random.choice(lines)
+    display_string = display_string.replace('\n', '')
+
     pikachu_d = pikachu_bitmap
-    display_menu = 0
+    display_menu = 2
+    counter = 0
 
     # Keys variable replace array with a integer value
     keys = 0b0000
@@ -283,8 +294,16 @@ def main():
             # Show text 
             display_string = display_string[1:] + display_string[:1]
             pitanga.display_print(Font5x7, display_string[:6], show_decimals=False)
-            time.sleep(0.12)
-    
+            time.sleep(0.15)
+            if counter > 180 and counter < 250:
+                display_string = '      '[:1] + display_string[1:] 
+            elif counter == 260:
+                counter = 0
+                display_string = random.choice(lines)
+                display_string = display_string.replace('\n', '')
+                print(display_string)
+            counter = counter + 1
+
         if display_menu == 3:
             # Show running dots 
             decimal_dots = circular_left_rotate(decimal_dots, 1, 8)

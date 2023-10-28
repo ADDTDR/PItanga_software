@@ -14,7 +14,7 @@ COLOR_PASSIVE = (4, 12, 5)
 CELL_PX_SIZE = 15
 
 def main():
-    display_string = "Motanas si Pisicuta ) "
+    display_string = "Why did the math book look sad? Because it had too many problems     "
     pitanga = Pitanga()
     running = False
     pygame.init()
