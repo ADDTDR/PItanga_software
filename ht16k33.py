@@ -3,7 +3,6 @@ import time
 from font5x7 import Font5x7_full as Font5x7
 from datetime import datetime
 from pikachu import pikachu as pikachu_bitmap
-from bluetooth_bitmap import bluetooth_bitmap
 
 
 HT16K33_ADDRESS_1 = 0x71
@@ -36,40 +35,26 @@ class HT16K33():
     def set_brightness(self, led_driver_brightness_level):
         self.bus.write_byte(self.ht16k33_i2c_address, HT16K33_CMD_BRIGHTNESS | led_driver_brightness_level)
 
-    def rotate_90(self, a):
-        b = []
-        for k in range(0, 7):       	
-            q = [(x & (1 << k)) >> k for x in a ]
-            qi = 0
-            for bit in q:    
-                qi = (qi << 1) | bit
-            b.append(qi)
-        return b
 
     def clear(self):
         self.buffer = [ 0x00 for x in range(0, 16)]
         
 
     def read_key_data(self):
-        # read all keys
+        # read all keys 
         key_data = self.bus.read_i2c_block_data(self.ht16k33_i2c_address, 0x40, 5)
         return key_data[4]
 
 
     def fill(self):
         self.buffer = [0xff for x in range(0, 16)]
-    
-    def decimal_dot(self):
-        # First bit connected to decimal point on second display  ltp305
-        # Row 15, pin 10,  on ht16k33 
-        self.buffer[13] = 0xff & 0b10000000
 
 
     def update(self):
         self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, self.buffer)
         
 
-    def write_data_raw(self, a, b, c):  
+    def write_data_raw(self, a, b, c, show_decimals=False, decimal_dots=0x00):  
         bx = []
         ax = a
         kx = b 
@@ -136,72 +121,7 @@ class HT16K33():
         self.buffer[13] = self.buffer[13] | (bx[6+14] & 0xff) << 2
         self.buffer[15] = self.buffer[15] | (bx[6+14] & 0xff) << 2
 
-        # Write data 
-        self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, self.buffer)
-
-    def write_data(self, a, b, c, show_decimals=False, decimal_dots=0x00):  
-        bx = []
-        ax = self.rotate_90(a)
-        kx = self.rotate_90(b)
-        cx = self.rotate_90(c)
-        
-        # Push data to common raw buffer 
-        for e in ax:
-            bx.append(e)
-        for e in kx:
-            bx.append(e)
-        for e in cx:
-            bx.append(e)
-
-        # Distribute data between lines 
-        # The same as function from above 
-        # Rewrite in later revisions to 1 function  
-        # Display module 3
-        self.buffer[0] = bx[0] & 0x1f
-        self.buffer[2] = bx[1] & 0x1f
-        self.buffer[4] = bx[2] & 0x1f
-        self.buffer[6] = bx[3] & 0x1f
-        self.buffer[8] = bx[4] & 0x1f 
-        self.buffer[10] = bx[5] & 0x1f  
-        self.buffer[12] = bx[6] & 0x1f
-        self.buffer[14] = 0x00
-    
-        #Display module 2 
-        self.buffer[1] = (bx[0+7] >> 3) & 0x03
-        self.buffer[0] = self.buffer[0] | (((bx[0+7] & 7) << 5)  & 0xff)
-
-        self.buffer[3] = (bx[1+7] >> 3) & 0x03
-        self.buffer[2] = self.buffer[2] | (((bx[1+7] & 7) << 5)  & 0xff)    
-
-        self.buffer[5] = (bx[2+7] >> 3) & 0x03
-        self.buffer[4] = self.buffer[4] | (((bx[2+7] & 7) << 5)  & 0xff)
-
-        self.buffer[7] = (bx[3+7] >> 3) & 0x03
-        self.buffer[6] = self.buffer[6] | (((bx[3+7] & 7) << 5)  & 0xff)
-
-        self.buffer[9] = (bx[4+7] >> 3)& 0x03
-        self.buffer[8] = self.buffer[8] | (((bx[4+7] & 7) << 5)  & 0xff)
-
-        self.buffer[11] = (bx[5+7] >> 3) & 0x03
-        self.buffer[10] = self.buffer[10] | (((bx[5+7] & 7) << 5)  & 0xff)
-
-        self.buffer[13] = (bx[6+7] >> 3) & 0x03
-        self.buffer[12] = self.buffer[12] | (((bx[6+7] & 7) << 5)  & 0xff)
-
-
-        # Display module 1
-        self.buffer[1] = self.buffer[1] | (bx[0+14] & 0xff) << 2
-        self.buffer[3] = self.buffer[3] | (bx[1+14] & 0xff) << 2
-        self.buffer[5] = self.buffer[5] | (bx[2+14] & 0xff) << 2
-        self.buffer[7] = self.buffer[7] | (bx[3+14] & 0xff) << 2
-        self.buffer[9] = self.buffer[9] | (bx[4+14] & 0xff) << 2
-        self.buffer[11] = self.buffer[11] | (bx[5+14] & 0xff) << 2
-        self.buffer[13] = self.buffer[13] | (bx[6+14] & 0xff) << 2
-        # Copy the same data in row8 as in row7 used to commute anode 15 between 2 display modules
-        # The same colum  is distributed between Display module 1 and display module 2 on different catode signal  
-        self.buffer[15] = self.buffer[15] | (bx[6+14] & 0xff) << 2
-
-        #place decimal dot 
+        # place decimal dot 
         if show_decimals:
 
             # Put dot on first display module for led driver 2
@@ -212,10 +132,9 @@ class HT16K33():
             # Put dot on third display module for led driver 1
             self.buffer[13] = self.buffer[13] | (decimal_dots & 0b00001000) << 4
 
-
-
-        #write data 
+        # Write data 
         self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, self.buffer)
+
 
 
 class Pitanga():
@@ -227,33 +146,50 @@ class Pitanga():
         self.led_driver_0 = HT16K33(ht16k33_i2c_address=HT16K33_ADDRESS_0)
         self.led_driver_0.clear()
 
+    def rotate_90(self, a):
+        b = []
+        for k in range(0, 7):       	
+            q = [(x & (1 << k)) >> k for x in a ]
+            qi = 0
+            for bit in q:    
+                qi = (qi << 1) | bit
+            b.append(qi)
+        return b
 
     # Display string 6 char
-    def display_print(self, font, str_data, show_decimals=False, decimal_dots=0x00):
-        #Clear buffer 
-        self.led_driver_1.clear()
-        self.led_driver_0.clear()
+    def display_print(self, font, str_data, show_decimals=False, decimal_dots=0x00, update_leds=True):
 
         font_first_char = 0x20
-
-        #Write data  led driver 1
-        self.led_driver_1.write_data(
-            font[ord(str_data[5])- font_first_char],
-            font[ord(str_data[4])- font_first_char],
-            font[ord(str_data[3])- font_first_char],
-            show_decimals=show_decimals,
-            decimal_dots = decimal_dots & 0b00000110
-        )
+        bx = [0,0,0,0,0,0]
+        bx[0] = self.rotate_90(font[ord(str_data[5])- font_first_char])
+        bx[1] = self.rotate_90(font[ord(str_data[4])- font_first_char])
+        bx[2] = self.rotate_90(font[ord(str_data[3])- font_first_char])
+        bx[3] = self.rotate_90(font[ord(str_data[2])- font_first_char])
+        bx[4] = self.rotate_90(font[ord(str_data[1])- font_first_char])
+        bx[5] = self.rotate_90(font[ord(str_data[0])- font_first_char])
         
-        # Write data  led driver 0 
-        ch = [x for x in font[ord(str_data[1])- font_first_char]] #Create separate array 
-        self.led_driver_0.write_data(
-            font[ord(str_data[2])- font_first_char],
-            ch,
-            font[ord(str_data[0])- font_first_char],
-            show_decimals=show_decimals,
-            decimal_dots = decimal_dots  & 0b00011000
-            )
+
+        raw_data = []
+        for e in bx:
+            ds = []
+            for line in e:
+                binary_string = '{0:05b}'.format(line)
+                # Convert the binary string to a binary array
+                binary_array = [int(bit) for bit in binary_string]
+                ds.append(binary_array)
+            raw_data.append(ds)
+
+
+        if update_leds:
+            #Clear buffer 
+            self.led_driver_1.clear()
+            self.led_driver_0.clear()
+            #Write data  led driver 1
+            self.led_driver_1.write_data_raw(bx[0], bx[1], bx[2], show_decimals, decimal_dots & 0b00000110)
+            # Write data  led driver 0
+            self.led_driver_0.write_data_raw(bx[3], bx[4], bx[5], show_decimals, decimal_dots  & 0b00011000)
+
+        return raw_data
 
 
     def display_bitmap(self, bitmap):
@@ -284,6 +220,8 @@ class Pitanga():
             led_display_data[4],
             led_display_data[5]
         )
+
+
 def main():
     display_string = "Motanas si Pisicuta ) "
     pikachu_d = pikachu_bitmap
@@ -301,10 +239,7 @@ def main():
         return ((num << shift) | (num >> (num_bits - shift))) & ((1 << num_bits) - 1)
 
     while True:
-        
-        current_time = datetime.now().strftime("%H%M%SS")
-        # Display_string = display_string 
-    
+           
         value = 1 if pitanga.led_driver_1.read_key_data() == 16 else 0
         # Prepare key data code uses bitwise operations for reasons of use the minimal memory possible 
         # and keep it easy portable to mcu 
@@ -330,6 +265,7 @@ def main():
         
         
         if display_menu == 0:
+            current_time = datetime.now().strftime("%H%M%SS")
             # Show time 
             # Circular rotate decimals pattern 
             # decimal_dots_time_patterns =  decimal_dots_time_patterns[1:] + decimal_dots_time_patterns[:1]
@@ -342,11 +278,6 @@ def main():
             pikachu_d = pikachu_d[1:] + pikachu_d[:1]
             pitanga.display_bitmap(pikachu_d)
             time.sleep(0.1)
-
-        # if display_menu == 1:
-        #     bluetooth_bitmap = bluetooth_bitmap[1:] + bluetooth_bitmap[:1]
-        #     pitanga.display_bitmap(bluetooth_bitmap)
-        #     time.sleep(0.1)
 
         if display_menu == 2:
             # Show text 
