@@ -1,8 +1,9 @@
 import time
+import random 
 import pygame
 import numpy as np 
 from datetime import datetime
-from ht16k33 import Pitanga
+from ht16k33 import Pitanga, JOKES_FILE
 from font5x7 import Font5x7_full as Font5x7
 
 from bluetooth_bitmap import bluetooth_bitmap
@@ -14,7 +15,14 @@ COLOR_PASSIVE = (4, 12, 5)
 CELL_PX_SIZE = 15
 
 def main():
-    display_string = "Why did the math book look sad? Because it had too many problems     "
+    
+    with open(JOKES_FILE, 'r') as file:
+        # Read all the lines into a list
+        lines = file.readlines()
+
+    display_string = random.choice(lines)
+    display_string = display_string.replace('\n', '')
+
     pitanga = Pitanga()
     running = False
     pygame.init()
