@@ -27,4 +27,4 @@ if __name__ == '__main__':
 	ds1631 = Ds1631()
 	while True:
 		print(ds1631.read_sensor())
-		time.sleep(1)
+		time.sleep(1.0)

@@ -25,3 +25,7 @@ sudo systemctl daemon-reload
 sudo systemctl start pitanga.service
 sudo systemctl enable pitanga.service
 ```
+
+
+on orangepi zero 
+/home/adre/ht16k33_python

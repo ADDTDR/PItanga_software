@@ -237,7 +237,7 @@ def main():
     display_string = display_string.replace('\n', '')
 
     pikachu_d = pikachu_bitmap
-    display_menu = 2
+    display_menu = 0
     counter = 0
 
     # Keys variable replace array with a integer value
