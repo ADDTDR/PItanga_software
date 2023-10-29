@@ -20,7 +20,7 @@ JOKES_FILE = 'jokes.txt'
 class HT16K33():
 
     def __init__(self, ht16k33_i2c_address):
-        bus = SMBus(2)
+        bus = SMBus(0)
         # Turn on oscillator 
         bus.write_byte(ht16k33_i2c_address, HT16K33_TURN_ON_OSCILLATOR)
         # Enable display (no blinking mode)
@@ -287,13 +287,13 @@ def main():
     
         if display_menu == 1:
             temperature = ds1631.read_sensor()
-            temperature = temperature + '  '
+            temperature = 't=' + temperature + '  '
             pitanga.display_print(Font5x7, temperature[:6], show_decimals=False, decimal_dots=0xf00)
             # # Show bitmap 
             # # display_print(Font5x7, display_string[:6])
             # pikachu_d = pikachu_d[1:] + pikachu_d[:1]
             # pitanga.display_bitmap(pikachu_d)
-            # time.sleep(0.1)
+            time.sleep(0.5)
 
         if display_menu == 2:
             # Show text 

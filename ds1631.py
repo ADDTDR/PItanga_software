@@ -6,6 +6,7 @@ DEV_ADDRESS = 0x4b
 class Ds1631():
 	def __init__(self) -> None:
 		self.bus =  SMBus(0)
+		self.data = []
 
 	
 	def read_sensor(self):
@@ -17,7 +18,9 @@ class Ds1631():
 		# print('raw temperature data {}'.format(raw_temp))
 		# tmsb=raw_temp[0] - 0xff if raw_temp[0] >= 0x80 else raw_temp[0]
 		temp=raw_temp[0] + (raw_temp[1] >> 4) * 0.0625
-		return '{:.2f}'.format( round(temp, 2) )
+		self.data.append(round( temp, 1 ))
+		self.data = self.data[-10:]
+		return '{:.1f}'.format( round( sum(self.data) / len(self.data) , 1) )
 
 
 if __name__ == '__main__':
