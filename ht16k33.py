@@ -4,6 +4,7 @@ import random
 from font5x7 import Font5x7_full as Font5x7
 from datetime import datetime
 from pikachu import pikachu as pikachu_bitmap
+from ds1631 import Ds1631
 
 
 HT16K33_ADDRESS_1 = 0x71
@@ -227,6 +228,7 @@ class Pitanga():
 
 def main():
 
+    ds1631 = Ds1631()
     with open(JOKES_FILE, 'r') as file:
         # Read all the lines into a list
         lines = file.readlines()
@@ -284,11 +286,14 @@ def main():
             time.sleep(0.12)
     
         if display_menu == 1:
-            # Show bitmap 
-            # display_print(Font5x7, display_string[:6])
-            pikachu_d = pikachu_d[1:] + pikachu_d[:1]
-            pitanga.display_bitmap(pikachu_d)
-            time.sleep(0.1)
+            temperature = ds1631.read_sensor()
+            temperature = temperature + '  '
+            pitanga.display_print(Font5x7, temperature[:6], show_decimals=False, decimal_dots=0xf00)
+            # # Show bitmap 
+            # # display_print(Font5x7, display_string[:6])
+            # pikachu_d = pikachu_d[1:] + pikachu_d[:1]
+            # pitanga.display_bitmap(pikachu_d)
+            # time.sleep(0.1)
 
         if display_menu == 2:
             # Show text 
