@@ -17,7 +17,7 @@ class Ds1631():
 		# print('raw temperature data {}'.format(raw_temp))
 		# tmsb=raw_temp[0] - 0xff if raw_temp[0] >= 0x80 else raw_temp[0]
 		temp=raw_temp[0] + (raw_temp[1] >> 4) * 0.0625
-		return temp 
+		return '{:.2f}'.format( round(temp, 2) )
 
 
 if __name__ == '__main__':
