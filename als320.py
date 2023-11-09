@@ -27,7 +27,6 @@ bus.write_i2c_block_data(ht16k33_i2c_address, 0x00, [0x00] * 16)
 
 
 numbers = {
-    0: 0,
     1: 0b00000011,
     2: 0b01110110,
     3: 0b00110111,

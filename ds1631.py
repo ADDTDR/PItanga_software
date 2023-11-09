@@ -5,7 +5,7 @@ DEV_ADDRESS = 0x4b
 
 class Ds1631():
 	def __init__(self) -> None:
-		self.bus =  SMBus(0)
+		self.bus =  SMBus(2)
 		self.data = []
 
 	

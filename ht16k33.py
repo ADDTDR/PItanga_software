@@ -14,13 +14,12 @@ HT16K33_CMD_BRIGHTNESS = 0xE0
 HT16K33_ENABLE_DISPLAY = 0x81
 HT16K33_TURN_ON_OSCILLATOR = 0x21
 LED_DRIVER_BRIGHTNESS_LEVEL = 15
-
 JOKES_FILE = 'jokes.txt'
 
 class HT16K33():
 
     def __init__(self, ht16k33_i2c_address):
-        bus = SMBus(0)
+        bus = SMBus(2)
         # Turn on oscillator 
         bus.write_byte(ht16k33_i2c_address, HT16K33_TURN_ON_OSCILLATOR)
         # Enable display (no blinking mode)
@@ -47,6 +46,7 @@ class HT16K33():
     def read_key_data(self):
         # read all keys 
         key_data = self.bus.read_i2c_block_data(self.ht16k33_i2c_address, 0x40, 5)
+        # print(key_data)
         return key_data[4]
 
 
@@ -89,52 +89,69 @@ class HT16K33():
         # Row7
         self.buffer[12] = bx[6] & 0x1f
         # Row8
-        self.buffer[14] = 0xff & 0x00 
+        self.buffer[14] = bx[6] & 0x1f
     
         # Place 2 
         # Row 1
         self.buffer[1] = (bx[0+7] >> 3) & 0x03
         self.buffer[0] = self.buffer[0] | (((bx[0+7] & 7) << 5)  & 0xff)
-        # Row2
+        # Row 2
         self.buffer[3] = (bx[1+7] >> 3) & 0x03
         self.buffer[2] = self.buffer[2] | (((bx[1+7] & 7) << 5)  & 0xff)    
-        # Row3
+        # Row 3
         self.buffer[5] = (bx[2+7] >> 3) & 0x03
         self.buffer[4] = self.buffer[4] | (((bx[2+7] & 7) << 5)  & 0xff)
-        # Row4
+        # Row 4
         self.buffer[7] = (bx[3+7] >> 3) & 0x03
         self.buffer[6] = self.buffer[6] | (((bx[3+7] & 7) << 5)  & 0xff)
-        # Row5
+        # Row 5
         self.buffer[9] = (bx[4+7] >> 3)& 0x03
         self.buffer[8] = self.buffer[8] | (((bx[4+7] & 7) << 5)  & 0xff)
-        # Row6
+        # Row 6
         self.buffer[11] = (bx[5+7] >> 3) & 0x03
         self.buffer[10] = self.buffer[10] | (((bx[5+7] & 7) << 5)  & 0xff)
-        # Row7
+        # Row 7
         self.buffer[13] = (bx[6+7] >> 3) & 0x03
         self.buffer[12] = self.buffer[12] | (((bx[6+7] & 7) << 5)  & 0xff)
+        # Row 8
+        self.buffer[15] = (bx[6+7] >> 3) & 0x03
+        self.buffer[14] = self.buffer[14] | (((bx[6+7] & 7) << 5)  & 0xff)
 
 
         # Place 1
+        # Row 1
         self.buffer[1] = self.buffer[1] | (bx[0+14] & 0xff) << 2
+        # Row 2
         self.buffer[3] = self.buffer[3] | (bx[1+14] & 0xff) << 2
+        # Row 3
         self.buffer[5] = self.buffer[5] | (bx[2+14] & 0xff) << 2
+        # Row 4
         self.buffer[7] = self.buffer[7] | (bx[3+14] & 0xff) << 2
+        # Row 5
         self.buffer[9] = self.buffer[9] | (bx[4+14] & 0xff) << 2
+        # Row 6 
         self.buffer[11] = self.buffer[11] | (bx[5+14] & 0xff) << 2
+        # Row 7
         self.buffer[13] = self.buffer[13] | (bx[6+14] & 0xff) << 2
-        self.buffer[15] = self.buffer[15] | (bx[6+14] & 0xff) << 2
+        # Row 8
+        # self.buffer[15] = self.buffer[15] | (1 & 0xff) << 2
+        # self.buffer[15] = se
 
         # place decimal dot 
         if show_decimals:
+            # Dot on display third display an14 & ca7
+            # print('{0:08b}'.format(decimal_dots))
+            # dot on ds 3
+            self.buffer[15] = self.buffer[15] | (decimal_dots & 0b00000001) << 6
+            # dot on ds 1
+            self.buffer[13] = self.buffer[13] | (decimal_dots & 0b00000100) << 5
+            # dot on ds 1
+            self.buffer[15] = self.buffer[15] | (decimal_dots & 0b00000010) << 6
+            
 
-            # Put dot on first display module for led driver 2
-            self.buffer[15] = self.buffer[15] | (decimal_dots & 0b00000100) << 5
-            # Put dot on second display module for led driver 2
-            self.buffer[13] = self.buffer[13] | (decimal_dots & 0b00000010) << 6
 
-            # Put dot on third display module for led driver 1
-            self.buffer[13] = self.buffer[13] | (decimal_dots & 0b00001000) << 4
+            # # Put dot on third display module for led driver 1
+            # self.buffer[13] = self.buffer[13] | (decimal_dots & 0b00001000) << 4
 
         # Write data 
         self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, self.buffer)
@@ -189,9 +206,9 @@ class Pitanga():
             self.led_driver_1.clear()
             self.led_driver_0.clear()
             #Write data  led driver 1
-            self.led_driver_1.write_data_raw(bx[0], bx[1], bx[2], show_decimals, decimal_dots & 0b00000110)
+            self.led_driver_1.write_data_raw(bx[0], bx[1], bx[2], show_decimals, decimal_dots & 0b00000111)
             # Write data  led driver 0
-            self.led_driver_0.write_data_raw(bx[3], bx[4], bx[5], show_decimals, decimal_dots  & 0b00011000)
+            self.led_driver_0.write_data_raw(bx[3], bx[4], bx[5], False, decimal_dots  & 0x00)
 
         return raw_data
 
@@ -237,13 +254,13 @@ def main():
     display_string = display_string.replace('\n', '')
 
     pikachu_d = pikachu_bitmap
-    display_menu = 0
+    display_menu = 3
     counter = 0
 
     # Keys variable replace array with a integer value
-    keys = 0b0000
+    key_a = 0b0000
     pitanga  = Pitanga()
-    decimal_dots = 0b00001010
+    decimal_dots = 0b00000101
     # Dots  will alternate between values
     decimal_dots_time_patterns = [0b00001010, 0b00000000]
 
@@ -252,24 +269,24 @@ def main():
         return ((num << shift) | (num >> (num_bits - shift))) & ((1 << num_bits) - 1)
 
     while True:
-           
-        value = 1 if pitanga.led_driver_1.read_key_data() == 16 else 0
+        keys = pitanga.led_driver_1.read_key_data()   
+        value = 1 if  keys & 0x10 == 16 else 0
         # Prepare key data code uses bitwise operations for reasons of use the minimal memory possible 
         # and keep it easy portable to mcu 
         # Shift bits to the left of an integer instead of using separate element of an array to store button value 
 
-        keys = keys << 1
+        key_a = key_a << 1
         # Bit insert position 0 indicates to insert value in the lsb place 
         bit_insert_position = 0 
         mask = 1 << bit_insert_position
-        keys = (keys & ~mask) | ((value << bit_insert_position) & mask)
+        key_a = (key_a & ~mask) | ((value << bit_insert_position) & mask)
         #apply 4 bit mask but 2 bit are sufficient do detect rising edge 
-        keys = keys & 0x0f 
+        key_a = key_a & 0x0f 
 
         # Toggle state only if previously button state was 0
         # Meaning button was released 
         # check bit position 0 and 1 of integer value, detecting rising edge condition 
-        if keys & 0b00000001 == 1 and keys & 0b00000010 == 0:
+        if key_a & 0b00000001 == 1 and key_a & 0b00000010 == 0:
             display_menu = display_menu + 1
             # Simple menu state machine flag 
             if display_menu == 4:
@@ -282,7 +299,7 @@ def main():
             # Show time 
             # Circular rotate decimals pattern 
             # decimal_dots_time_patterns =  decimal_dots_time_patterns[1:] + decimal_dots_time_patterns[:1]
-            pitanga.display_print(Font5x7, current_time[:6], show_decimals=False, decimal_dots=0xf00)
+            pitanga.display_print(Font5x7, current_time[:6], show_decimals=True, decimal_dots=0x02)
             time.sleep(0.12)
     
         if display_menu == 1:
@@ -290,16 +307,16 @@ def main():
             temperature = 't=' + temperature + '  '
             pitanga.display_print(Font5x7, temperature[:6], show_decimals=False, decimal_dots=0xf00)
             # # Show bitmap 
-            # # display_print(Font5x7, display_string[:6])
             # pikachu_d = pikachu_d[1:] + pikachu_d[:1]
             # pitanga.display_bitmap(pikachu_d)
-            time.sleep(0.5)
+            time.sleep(0.12)
+            pass
 
         if display_menu == 2:
             # Show text 
             display_string = display_string[1:] + display_string[:1]
             pitanga.display_print(Font5x7, display_string[:6], show_decimals=False)
-            time.sleep(0.15)
+            time.sleep(0.1)
             if counter > 180 and counter < 250:
                 display_string = '      '[:1] + display_string[1:] 
             elif counter == 260:
@@ -309,9 +326,12 @@ def main():
             counter = counter + 1
 
         if display_menu == 3:
+            current_time = datetime.now().strftime(" %H%M ")
+            # Show time 
             # Show running dots 
             decimal_dots = circular_left_rotate(decimal_dots, 1, 8)
-            pitanga.display_print(Font5x7, '      ', show_decimals=True, decimal_dots=decimal_dots)
+            # decimal_dots = 0b00000011
+            pitanga.display_print(Font5x7, current_time, show_decimals=True, decimal_dots=decimal_dots)
             time.sleep(0.12)
         
 if __name__ == '__main__':
