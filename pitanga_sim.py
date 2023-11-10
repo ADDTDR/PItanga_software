@@ -4,7 +4,7 @@ import pygame
 import numpy as np 
 from datetime import datetime
 from ht16k33 import Pitanga, JOKES_FILE
-from font5x7 import Font5x7_full as Font5x7
+from font5x7 import Font5x7_90 as Font5x7
 
 # from bluetooth_bitmap import bluetooth_bitmap
 # from pikachu import pikachu as pikachu_bitmap
