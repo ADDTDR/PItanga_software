@@ -1,7 +1,7 @@
 from smbus import SMBus
 import time
 import random 
-from font5x7 import Font5x7_full as Font5x7
+from font5x7 import Font5x7_90 as Font5x7
 from datetime import datetime
 from pikachu import pikachu as pikachu_bitmap
 from ds1631 import Ds1631
@@ -182,13 +182,19 @@ class Pitanga():
 
         font_first_char = 0x20
         bx = [0,0,0,0,0,0]
-        bx[0] = self.rotate_90(font[ord(str_data[5])- font_first_char])
-        bx[1] = self.rotate_90(font[ord(str_data[4])- font_first_char])
-        bx[2] = self.rotate_90(font[ord(str_data[3])- font_first_char])
-        bx[3] = self.rotate_90(font[ord(str_data[2])- font_first_char])
-        bx[4] = self.rotate_90(font[ord(str_data[1])- font_first_char])
-        bx[5] = self.rotate_90(font[ord(str_data[0])- font_first_char])
-        
+        # bx[0] = self.rotate_90(font[ord(str_data[5])- font_first_char])
+        # bx[1] = self.rotate_90(font[ord(str_data[4])- font_first_char])
+        # bx[2] = self.rotate_90(font[ord(str_data[3])- font_first_char])
+        # bx[3] = self.rotate_90(font[ord(str_data[2])- font_first_char])
+        # bx[4] = self.rotate_90(font[ord(str_data[1])- font_first_char])
+        # bx[5] = self.rotate_90(font[ord(str_data[0])- font_first_char])
+
+        bx[0] = font[ord(str_data[5])- font_first_char]
+        bx[1] = font[ord(str_data[4])- font_first_char]
+        bx[2] = font[ord(str_data[3])- font_first_char]
+        bx[3] = font[ord(str_data[2])- font_first_char]
+        bx[4] = font[ord(str_data[1])- font_first_char]
+        bx[5] = font[ord(str_data[0])- font_first_char]
 
         raw_data = []
         for e in bx:
