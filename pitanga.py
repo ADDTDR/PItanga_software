@@ -35,8 +35,13 @@ class HT16K33():
         # Decimal point hardware limited to 1 per 3 5x7 displays sine driver support only 16 rows 
         self.decimal_dot_bit = 0
 
-    def set_brightness(self, led_driver_brightness_level):
-        self.bus.write_byte(self.ht16k33_i2c_address, HT16K33_CMD_BRIGHTNESS | led_driver_brightness_level)
+        self.key_a = 0b0000
+        self.key_b = 0b0000
+        self.key_c = 0b0000
+        self.key_d = 0b0000
+
+    def set_brightness(self, brightness):
+        self.bus.write_byte(self.ht16k33_i2c_address, HT16K33_CMD_BRIGHTNESS | brightness)
 
 
     def clear(self):
@@ -46,8 +51,59 @@ class HT16K33():
     def read_key_data(self):
         # read all keys 
         key_data = self.bus.read_i2c_block_data(self.ht16k33_i2c_address, 0x40, 5)
-        # print(key_data)
-        return key_data[4]
+        keys = key_data[4]
+
+  
+        key_a_press, key_b_press, key_c_press, key_d_press = False, False, False, False
+
+        value = 1 if  keys & 0x10 == 16 else 0
+        # Prepare key data code uses bitwise operations for reasons of use the minimal memory possible 
+        # and keep it easy portable to mcu 
+        # Shift bits to the left of an integer instead of using separate element of an array to store button value 
+        self.key_a = self.key_a << 1
+        # Bit insert position 0 indicates to insert value in the lsb place 
+        bit_insert_position = 0 
+        mask = 1 << bit_insert_position
+        self.key_a = (self.key_a & ~mask) | ((value << bit_insert_position) & mask)
+        #apply 4 bit mask but 2 bit are sufficient do detect rising edge 
+        self.key_a = self.key_a & 0x0f 
+
+        # Toggle state only if previously button state was 0
+        # Meaning button was released 
+        # check bit position 0 and 1 of integer value, detecting rising edge condition 
+        if self.key_a & 0b00000001 == 1 and self.key_a & 0b00000010 == 0:
+            key_a_press = True
+
+
+        value = 1 if  keys & 0x20 == 0x20 else 0
+        self.key_b = self.key_b << 1
+        bit_insert_position = 0 
+        mask = 1 << bit_insert_position
+        self.key_b = (self.key_b & ~mask) | ((value << bit_insert_position) & mask)
+        self.key_b = self.key_b & 0x0f 
+        if self.key_b & 0b00000001 == 1 and self.key_b & 0b00000010 == 0:
+            key_b_press = True
+        
+        value = 1 if  keys & 0x40 == 0x40 else 0
+        self.key_c = self.key_c << 1
+        bit_insert_position = 0 
+        mask = 1 << bit_insert_position
+        self.key_c = (self.key_c & ~mask) | ((value << bit_insert_position) & mask)
+        self.key_c = self.key_c & 0x0f 
+        if self.key_c & 0b00000001 == 1 and self.key_c & 0b00000010 == 0:
+            key_c_press = True
+        
+        value = 1 if  keys & 0x80 == 0x80 else 0
+        self.key_d = self.key_d << 1
+        bit_insert_position = 0 
+        mask = 1 << bit_insert_position
+        self.key_d = (self.key_d & ~mask) | ((value << bit_insert_position) & mask)
+        self.key_d = self.key_d & 0x0f 
+        if self.key_d & 0b00000001 == 1 and self.key_d & 0b00000010 == 0:
+            key_d_press = True
+
+
+        return (key_a_press, key_b_press, key_c_press, key_d_press)
 
 
     def fill(self):
@@ -166,6 +222,7 @@ class Pitanga():
         self.led_driver_1.clear()
         self.led_driver_0 = HT16K33(ht16k33_i2c_address=HT16K33_ADDRESS_0)
         self.led_driver_0.clear()
+        self.brightness = LED_DRIVER_BRIGHTNESS_LEVEL
 
     def rotate_90(self, a):
         b = []
@@ -182,12 +239,7 @@ class Pitanga():
 
         font_first_char = 0x20
         bx = [0,0,0,0,0,0]
-        # bx[0] = self.rotate_90(font[ord(str_data[5])- font_first_char])
-        # bx[1] = self.rotate_90(font[ord(str_data[4])- font_first_char])
-        # bx[2] = self.rotate_90(font[ord(str_data[3])- font_first_char])
-        # bx[3] = self.rotate_90(font[ord(str_data[2])- font_first_char])
-        # bx[4] = self.rotate_90(font[ord(str_data[1])- font_first_char])
-        # bx[5] = self.rotate_90(font[ord(str_data[0])- font_first_char])
+   
 
         bx[0] = font[ord(str_data[5])- font_first_char]
         bx[1] = font[ord(str_data[4])- font_first_char]
@@ -214,7 +266,7 @@ class Pitanga():
             #Write data  led driver 1
             self.led_driver_1.write_data_raw(bx[0], bx[1], bx[2], show_decimals, decimal_dots & 0b00000111)
             # Write data  led driver 0
-            self.led_driver_0.write_data_raw(bx[3], bx[4], bx[5], show_decimals, (decimal_dots  & 0b00111000) >> 3 )
+            self.led_driver_0.write_data_raw(bx[3], bx[4], bx[5], show_decimals, (decimal_dots  & 0b00111000) >> 3)
 
         return raw_data
 
@@ -248,6 +300,9 @@ class Pitanga():
             led_display_data[5]
         )
 
+    def set_brightness(self, brightness=5):
+        self.led_driver_0.set_brightness(brightness=self.brightness)
+        self.led_driver_1.set_brightness(brightness=self.brightness)
 
 def main():
 
@@ -263,82 +318,94 @@ def main():
     display_menu = 3
     counter = 0
 
-    # Keys variable replace array with a integer value
-    key_a = 0b0000
+
+
     pitanga  = Pitanga()
     decimal_dots = 0b00000101
     # Dots  will alternate between values
     decimal_dots_time_patterns = [0b00001010, 0b00000000]
+
+    running = 0
 
     def circular_left_rotate(num, shift, num_bits=8):
         shift %= num_bits
         return ((num << shift) | (num >> (num_bits - shift))) & ((1 << num_bits) - 1)
 
     while True:
-        keys = pitanga.led_driver_1.read_key_data()   
-        value = 1 if  keys & 0x10 == 16 else 0
-        # Prepare key data code uses bitwise operations for reasons of use the minimal memory possible 
-        # and keep it easy portable to mcu 
-        # Shift bits to the left of an integer instead of using separate element of an array to store button value 
+        pitanga_keys = pitanga.led_driver_1.read_key_data()  
 
-        key_a = key_a << 1
-        # Bit insert position 0 indicates to insert value in the lsb place 
-        bit_insert_position = 0 
-        mask = 1 << bit_insert_position
-        key_a = (key_a & ~mask) | ((value << bit_insert_position) & mask)
-        #apply 4 bit mask but 2 bit are sufficient do detect rising edge 
-        key_a = key_a & 0x0f 
 
-        # Toggle state only if previously button state was 0
-        # Meaning button was released 
-        # check bit position 0 and 1 of integer value, detecting rising edge condition 
-        if key_a & 0b00000001 == 1 and key_a & 0b00000010 == 0:
+        if pitanga_keys[0]:
             display_menu = display_menu + 1
             # Simple menu state machine flag 
             if display_menu == 4:
                 display_menu = 0 
 
-        
-        
-        if display_menu == 0:
-            current_time = datetime.now().strftime("%H%M%SS")
-            # Show time 
-            # Circular rotate decimals pattern 
-            # decimal_dots_time_patterns =  decimal_dots_time_patterns[1:] + decimal_dots_time_patterns[:1]
-            pitanga.display_print(Font5x7, current_time[:6], show_decimals=True, decimal_dots=0x02)
-            time.sleep(0.12)
+        if pitanga_keys[1]:
+            if pitanga.brightness < 16:
+                pitanga.brightness = pitanga.brightness + 1
+                pitanga.set_brightness()                
+            pitanga.display_print(Font5x7, 'B={}   '.format(pitanga.brightness), show_decimals=False, decimal_dots=0xf00)
+            running = 10
+
+        if pitanga_keys[2]:
+            if pitanga.brightness > 0:
+                pitanga.brightness = pitanga.brightness - 1
+                pitanga.set_brightness()                
+            pitanga.display_print(Font5x7, 'B={}   '.format(pitanga.brightness), show_decimals=False, decimal_dots=0xf00)
+            running = 10
+
+        if pitanga_keys[3]:
+            if display_menu >= 0:
+                display_menu = display_menu - 1
+                if display_menu == -1:
+                    display_menu = 3 
+                
     
-        if display_menu == 1:
-            temperature = ds1631.read_sensor()
-            temperature = 't=' + temperature + '  '
-            pitanga.display_print(Font5x7, temperature[:6], show_decimals=False, decimal_dots=0xf00)
-            # # Show bitmap 
-            # pikachu_d = pikachu_d[1:] + pikachu_d[:1]
-            # pitanga.display_bitmap(pikachu_d)
-            time.sleep(0.12)
-            pass
-
-        if display_menu == 2:
-            # Show text 
-            display_string = display_string[1:] + display_string[:1]
-            pitanga.display_print(Font5x7, display_string[:6], show_decimals=False)
-            time.sleep(0.1)
-            if counter > 180 and counter < 250:
-                display_string = '      '[:1] + display_string[1:] 
-            elif counter == 260:
-                counter = 0
-                display_string = random.choice(lines)
-                display_string = display_string.replace('\n', '')
-            counter = counter + 1
-
-        if display_menu == 3:
-            current_time = datetime.now().strftime(" %H%M ")
-            # Show time 
-            # Show running dots 
-            decimal_dots = circular_left_rotate(decimal_dots, 1, 8)
-            # decimal_dots = 0b00000011
-            pitanga.display_print(Font5x7, current_time, show_decimals=True, decimal_dots=decimal_dots)
-            time.sleep(0.12)
+        if running == 0:
+            if display_menu == 0:
+                current_time = datetime.now().strftime("%H%M%SS")
+                # Show time 
+                # Circular rotate decimals pattern 
+                # decimal_dots_time_patterns =  decimal_dots_time_patterns[1:] + decimal_dots_time_patterns[:1]
+                pitanga.display_print(Font5x7, current_time[:6], show_decimals=True, decimal_dots=0x02)
+                time.sleep(0.12)
         
+            if display_menu == 1:
+                temperature = ds1631.read_sensor()
+                temperature = 't=' + temperature + '  '
+                pitanga.display_print(Font5x7, temperature[:6], show_decimals=False, decimal_dots=0xf00)
+                # # Show bitmap 
+                # pikachu_d = pikachu_d[1:] + pikachu_d[:1]
+                # pitanga.display_bitmap(pikachu_d)
+                time.sleep(0.12)
+      
+
+            if display_menu == 2:
+                # Show text 
+                display_string = display_string[1:] + display_string[:1]
+                pitanga.display_print(Font5x7, display_string[:6], show_decimals=False)
+                time.sleep(0.1)
+                if counter > 180 and counter < 250:
+                    display_string = '      '[:1] + display_string[1:] 
+                elif counter == 260:
+                    counter = 0
+                    display_string = random.choice(lines)
+                    display_string = display_string.replace('\n', '')
+                counter = counter + 1
+
+            if display_menu == 3:
+                current_time = datetime.now().strftime(" %H%M ")
+                # Show time 
+                # Show running dots 
+                decimal_dots = circular_left_rotate(decimal_dots, 1, 8)
+                # decimal_dots = 0b00000011
+                pitanga.display_print(Font5x7, current_time, show_decimals=True, decimal_dots=decimal_dots & 0b0000111)
+                time.sleep(0.12)
+        else:
+            if running > 0:
+                running = running -1
+                time.sleep(0.1)
+
 if __name__ == '__main__':
     main()
