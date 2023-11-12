@@ -13,7 +13,7 @@ HT16K33_ADDRESS_1 = 0x74
 HT16K33_CMD_BRIGHTNESS = 0xE0
 HT16K33_ENABLE_DISPLAY = 0x81
 HT16K33_TURN_ON_OSCILLATOR = 0x21
-LED_DRIVER_BRIGHTNESS_LEVEL = 15
+LED_DRIVER_BRIGHTNESS_LEVEL = 10
 JOKES_FILE = 'jokes.txt'
 
 class HT16K33():
@@ -318,8 +318,6 @@ def main():
     display_menu = 3
     counter = 0
 
-
-
     pitanga  = Pitanga()
     decimal_dots = 0b00000101
     # Dots  will alternate between values
@@ -342,17 +340,17 @@ def main():
                 display_menu = 0 
 
         if pitanga_keys[1]:
-            if pitanga.brightness < 16:
+            if pitanga.brightness < 15:
                 pitanga.brightness = pitanga.brightness + 1
                 pitanga.set_brightness()                
-            pitanga.display_print(Font5x7, 'B={}   '.format(pitanga.brightness), show_decimals=False, decimal_dots=0xf00)
+            pitanga.display_print(Font5x7, 'B={}   '.format(pitanga.brightness + 1), show_decimals=False, decimal_dots=0xf00)
             running = 10
 
         if pitanga_keys[2]:
             if pitanga.brightness > 0:
                 pitanga.brightness = pitanga.brightness - 1
                 pitanga.set_brightness()                
-            pitanga.display_print(Font5x7, 'B={}   '.format(pitanga.brightness), show_decimals=False, decimal_dots=0xf00)
+            pitanga.display_print(Font5x7, 'B={}   '.format(pitanga.brightness + 1), show_decimals=False, decimal_dots=0xf00)
             running = 10
 
         if pitanga_keys[3]:
@@ -372,12 +370,15 @@ def main():
                 time.sleep(0.12)
         
             if display_menu == 1:
-                temperature = ds1631.read_sensor()
-                temperature = 't=' + temperature + '  '
-                pitanga.display_print(Font5x7, temperature[:6], show_decimals=False, decimal_dots=0xf00)
+                if counter > 10:
+                    temperature = ds1631.read_sensor()
+                    temperature = 't=' + temperature + '  '
+                    pitanga.display_print(Font5x7, temperature[:6], show_decimals=False, decimal_dots=0xf00)
+                    counter = 0
                 # # Show bitmap 
                 # pikachu_d = pikachu_d[1:] + pikachu_d[:1]
                 # pitanga.display_bitmap(pikachu_d)
+                counter = counter + 1
                 time.sleep(0.12)
       
 
@@ -405,7 +406,7 @@ def main():
         else:
             if running > 0:
                 running = running -1
-                time.sleep(0.1)
+                time.sleep(0.08)
 
 if __name__ == '__main__':
     main()
