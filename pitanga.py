@@ -6,14 +6,14 @@ from datetime import datetime
 from pikachu import pikachu as pikachu_bitmap
 from ds1631 import Ds1631
 
-HT16K33_ADDRESS_0 = 0x72
-HT16K33_ADDRESS_1 = 0x74
+HT16K33_ADDRESS_0 = 0x70
+HT16K33_ADDRESS_1 = 0x71
 
 
 HT16K33_CMD_BRIGHTNESS = 0xE0
 HT16K33_ENABLE_DISPLAY = 0x81
 HT16K33_TURN_ON_OSCILLATOR = 0x21
-LED_DRIVER_BRIGHTNESS_LEVEL = 10
+LED_DRIVER_BRIGHTNESS_LEVEL = 5
 JOKES_FILE = 'jokes.txt'
 
 class HT16K33():
@@ -49,6 +49,7 @@ class HT16K33():
         
 
     def read_key_data(self):
+
         # read all keys 
         key_data = self.bus.read_i2c_block_data(self.ht16k33_i2c_address, 0x40, 5)
         keys = key_data[4]

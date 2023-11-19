@@ -7,7 +7,7 @@ from pikachu import pikachu as pikachu_bitmap
 from ds1631 import Ds1631
 
 HT16K33_ADDRESS_0 = 0x72
-HT16K33_ADDRESS_1 = 0x74
+HT16K33_ADDRESS_1 = 0x73
 
 
 HT16K33_CMD_BRIGHTNESS = 0xE0
