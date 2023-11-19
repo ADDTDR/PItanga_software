@@ -81,3 +81,10 @@ while True:
         bus.write_i2c_block_data(SAA1064_ADDRESS, 0x01, [digit_1, 0x00, 0x00, 0x00])
         time.sleep(0.5)
     time.sleep(1)
+
+    snake  = 0b00000001
+    for e in range(0, 128):
+        snake = circular_left_rotate(snake, 1, 6)
+        bus.write_i2c_block_data(SAA1064_ADDRESS, 0x01, [snake, 0x00, 0x00, 0x00])
+        time.sleep(0.2)
+    time.sleep(1)
