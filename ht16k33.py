@@ -145,7 +145,7 @@ class HT16K33():
             self.buffer[15] = self.buffer[15] | (decimal_dots & 0b00000001) << 6
             # dot on ds 1
             self.buffer[13] = self.buffer[13] | (decimal_dots & 0b00000100) << 5
-            # dot on ds 1
+            # dot on ds 2
             self.buffer[15] = self.buffer[15] | (decimal_dots & 0b00000010) << 6
             
 
