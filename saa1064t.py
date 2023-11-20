@@ -1,4 +1,5 @@
 from smbus import SMBus
+from datetime import datetime
 import time 
 
 SAA1064_ADDRESS = 0x38 
@@ -20,7 +21,7 @@ Byte order:
 
 
 #Config Driver 
-CONTROL_REG = 0b00100000
+CONTROL_REG = 0b01000000
 bus.write_i2c_block_data(SAA1064_ADDRESS, 0x00, [CONTROL_REG])
 
 
@@ -58,33 +59,41 @@ def circular_left_rotate(num, shift, num_bits=8):
     return ((num << shift) | (num >> (num_bits - shift))) & ((1 << num_bits) - 1)
 
 while True:
-    for key in 'PLAY ':
-        digit_1 = digit_font.get(key, 0x00)
-        bus.write_i2c_block_data(SAA1064_ADDRESS, 0x01, [digit_1, 0x00, 0x00, 0x00])
-        time.sleep(0.5)
-    time.sleep(1)
+    time_str = datetime.now().strftime(" %H.%M ") 
+    # print(time_str)
 
-    for key in 'PAUSE ':
+    for key in time_str:
         digit_1 = digit_font.get(key, 0x00)
         bus.write_i2c_block_data(SAA1064_ADDRESS, 0x01, [digit_1, 0x00, 0x00, 0x00])
         time.sleep(0.5)
     time.sleep(2)
+    # for key in 'PLAY ':
+    #     digit_1 = digit_font.get(key, 0x00)
+    #     bus.write_i2c_block_data(SAA1064_ADDRESS, 0x01, [digit_1, 0x00, 0x00, 0x00])
+    #     time.sleep(0.25)
+    # time.sleep(1)
 
-    for key in '1234567890. ':
-        digit_1 = digit_font.get(key, 0x00)
-        bus.write_i2c_block_data(SAA1064_ADDRESS, 0x01, [digit_1, 0x00, 0x00, 0x00])
-        time.sleep(0.5)
-    time.sleep(1)
+    # for key in 'PAUSE ':
+    #     digit_1 = digit_font.get(key, 0x00)
+    #     bus.write_i2c_block_data(SAA1064_ADDRESS, 0x01, [digit_1, 0x00, 0x00, 0x00])
+    #     time.sleep(0.25)
+    # time.sleep(2)
+
+    # for key in '1234567890. ':
+    #     digit_1 = digit_font.get(key, 0x00)
+    #     bus.write_i2c_block_data(SAA1064_ADDRESS, 0x01, [digit_1, 0x00, 0x00, 0x00])
+    #     time.sleep(0.25)
+    # time.sleep(1)
     
-    for key in 'STOP ':
-        digit_1 = digit_font.get(key, 0x00)
-        bus.write_i2c_block_data(SAA1064_ADDRESS, 0x01, [digit_1, 0x00, 0x00, 0x00])
-        time.sleep(0.5)
-    time.sleep(1)
+    # for key in 'STOP ':
+    #     digit_1 = digit_font.get(key, 0x00)
+    #     bus.write_i2c_block_data(SAA1064_ADDRESS, 0x01, [digit_1, 0x00, 0x00, 0x00])
+    #     time.sleep(0.25)
+    # time.sleep(1)
 
-    snake  = 0b00000001
-    for e in range(0, 128):
-        snake = circular_left_rotate(snake, 1, 6)
-        bus.write_i2c_block_data(SAA1064_ADDRESS, 0x01, [snake, 0x00, 0x00, 0x00])
-        time.sleep(0.2)
-    time.sleep(1)
+    # snake  = 0b00000001
+    # for e in range(0, 128):
+    #     snake = circular_left_rotate(snake, 1, 6)
+    #     bus.write_i2c_block_data(SAA1064_ADDRESS, 0x01, [snake, 0x00, 0x00, 0x00])
+    #     time.sleep(0.05)
+    # time.sleep(1)
