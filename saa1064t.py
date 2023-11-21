@@ -65,7 +65,7 @@ while True:
     for key in time_str:
         digit_1 = digit_font.get(key, 0x00)
         bus.write_i2c_block_data(SAA1064_ADDRESS, 0x01, [digit_1, 0x00, 0x00, 0x00])
-        time.sleep(0.5)
+        time.sleep(0.3)
     # time.sleep(0.5)
     # for key in 'PLAY ':
     #     digit_1 = digit_font.get(key, 0x00)
