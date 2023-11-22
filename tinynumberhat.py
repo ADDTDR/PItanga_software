@@ -90,7 +90,7 @@ class TinynumberHat():
 			buffer[5] = self.numbers.get(time_now[5], 0b01000000) 
 
 			buffer[6] = self.numbers.get(time_now[6], 0b01000000)
-			buffer[7] = self.numbers.get(time_now[7], 0b01000000) | 0b10000000 if i == True  else numbers.get(time_now[7], 0b01000000)
+			buffer[7] = self.numbers.get(time_now[7], 0b01000000) | 0b10000000 if i == True  else self.numbers.get(time_now[7], 0b01000000)
 			buffer[8] = 0xff
 			# buffer[0] = 0b00000011
 			#Write buffer 
