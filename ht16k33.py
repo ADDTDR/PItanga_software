@@ -6,6 +6,8 @@ from datetime import datetime
 from pikachu import pikachu as pikachu_bitmap
 from ds1631 import Ds1631
 import random 
+from tinynumberhat import TinynumberHat
+import threading 
 
 HT16K33_ADDRESS_0 = 0x72
 HT16K33_ADDRESS_1 = 0x73
@@ -16,6 +18,10 @@ HT16K33_ENABLE_DISPLAY = 0x81
 HT16K33_TURN_ON_OSCILLATOR = 0x21
 LED_DRIVER_BRIGHTNESS_LEVEL = 5
 JOKES_FILE = 'jokes.txt'
+tinynumberhat = TinynumberHat()
+t = threading.Thread(name='tinynumberhat', target=tinynumberhat.shoe_time)
+t.start()
+
 
 class HT16K33():
 
@@ -228,7 +234,7 @@ class Pitanga():
 
     def rotate_90(self, a):
         b = []
-        for k in range(0, 7):       	
+        for k in range(0, 7):           
             q = [(x & (1 << k)) >> k for x in a ]
             qi = 0
             for bit in q:    
@@ -372,16 +378,18 @@ def main():
                 time.sleep(0.12)
         
             if display_menu == 1:
-                if counter > 10:
+                #if counter > 10:
                     #temperature = ds1631.read_sensor()
-                    temperature = str(random.randint(0, 100))
-                    temperature = 't=' + temperature + '  '
-                    pitanga.display_print(Font5x7, temperature[:6], show_decimals=False, decimal_dots=0xf00)
-                    counter = 0
+                #    temperature = str(random.randint(0, 100))
+                #    temperature = 't=' + temperature + '  '
+                #    pitanga.display_print(Font5x7, temperature[:6], show_decimals=False, decimal_dots=0xf00)
+                #    counter = 0
                 # # Show bitmap 
                 # pikachu_d = pikachu_d[1:] + pikachu_d[:1]
                 # pitanga.display_bitmap(pikachu_d)
-                counter = counter + 1
+                #counter = counter + 1
+                decimal_dots = circular_left_rotate(decimal_dots, 1, 8)
+                pitanga.display_print(Font5x7, '       ', show_decimals=True, decimal_dots=decimal_dots & 0b0000111)
                 time.sleep(0.12)
       
 
