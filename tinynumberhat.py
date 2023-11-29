@@ -6,13 +6,13 @@ HT16K33_ADDRESS_0 = 0x70
 HT16K33_CMD_BRIGHTNESS = 0xE0
 HT16K33_ENABLE_DISPLAY = 0x81
 HT16K33_TURN_ON_OSCILLATOR = 0x21
-LED_DRIVER_BRIGHTNESS_LEVEL = 15
+LED_DRIVER_BRIGHTNESS_LEVEL = 7
 
 class TinynumberHat():
 
 	def __init__(self) -> None:
 		
-		self.bus = SMBus(0)
+		self.bus = SMBus(2)
 		self.ht16k33_i2c_address = HT16K33_ADDRESS_0
 
 		# Turn on oscillator 
@@ -26,7 +26,7 @@ class TinynumberHat():
 
 		# Fill with 1, turn on all segments 
 		self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, [0xff] * 16)
-		time.sleep(0.05)
+		time.sleep(0.1)
 		# Clear display 
 		self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, [0x00] * 16)
 
@@ -91,7 +91,7 @@ class TinynumberHat():
 
 			buffer[6] = self.numbers.get(time_now[6], 0b01000000)
 			buffer[7] = self.numbers.get(time_now[7], 0b01000000) | 0b10000000 if i == True  else self.numbers.get(time_now[7], 0b01000000)
-			buffer[8] = 0xff
+			buffer[8] = self.numbers.get(time_now[8], 0b01000000) 
 			# buffer[0] = 0b00000011
 			#Write buffer 
 			self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, buffer)

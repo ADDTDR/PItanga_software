@@ -366,8 +366,8 @@ def main():
                 current_time = datetime.now().strftime("%H%M%SS")
                 # Show time 
                 # Circular rotate decimals pattern 
-                # decimal_dots_time_patterns =  decimal_dots_time_patterns[1:] + decimal_dots_time_patterns[:1]
-                pitanga.display_print(Font5x7, current_time[:6], show_decimals=True, decimal_dots=0x02)
+                decimal_dots_time_patterns =  decimal_dots_time_patterns[1:] + decimal_dots_time_patterns[:1]
+                pitanga.display_print(Font5x7, current_time[:6], show_decimals=True, decimal_dots=decimal_dots_time_patterns[0])
                 time.sleep(0.12)
         
             if display_menu == 1:
@@ -397,12 +397,13 @@ def main():
                 counter = counter + 1
 
             if display_menu == 3:
-                current_time = datetime.now().strftime(" %H%M ")
+                # current_time = datetime.now().strftime(" %H%M ")
+                current_time = '      '
                 # Show time 
                 # Show running dots 
                 decimal_dots = circular_left_rotate(decimal_dots, 1, 8)
                 # decimal_dots = 0b00000011
-                pitanga.display_print(Font5x7, current_time, show_decimals=True, decimal_dots=decimal_dots & 0b0000111)
+                pitanga.display_print(Font5x7, current_time, show_decimals=True, decimal_dots=decimal_dots & 0b00111111)
                 time.sleep(0.12)
         else:
             if running > 0:
