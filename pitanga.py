@@ -192,7 +192,6 @@ class HT16K33():
         self.buffer[13] = self.buffer[13] | (bx[6+14] & 0xff) << 2
         # Row 8
         # self.buffer[15] = self.buffer[15] | (1 & 0xff) << 2
-        # self.buffer[15] = se
 
         # place decimal dot 
         if show_decimals:
