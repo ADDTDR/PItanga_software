@@ -24,7 +24,7 @@ class GpsSerialReader():
                     hh = time_string[0] + time_string[1] 
                     mm = time_string[2] + time_string[3]
                     ss = time_string[4] + time_string[5]
-                    os.environ['GPS_CLOCK'] = hh + ':' + ':' + mm + ':' + ss
+                    os.environ['GPS_CLOCK'] = hh + ':' + mm + ':' + ss
           
 
 if __name__ == '__main__':
