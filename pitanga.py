@@ -192,7 +192,6 @@ class HT16K33():
         self.buffer[13] = self.buffer[13] | (bx[6+14] & 0xff) << 2
         # Row 8
         # self.buffer[15] = self.buffer[15] | (1 & 0xff) << 2
-        # self.buffer[15] = se
 
         # place decimal dot 
         if show_decimals:
@@ -325,6 +324,7 @@ def main():
     decimal_dots_time_patterns = [0b00001010, 0b00000000]
 
     running = 0
+    temperature = '      '
 
     def circular_left_rotate(num, shift, num_bits=8):
         shift %= num_bits
@@ -366,16 +366,19 @@ def main():
                 current_time = datetime.now().strftime("%H%M%SS")
                 # Show time 
                 # Circular rotate decimals pattern 
-                # decimal_dots_time_patterns =  decimal_dots_time_patterns[1:] + decimal_dots_time_patterns[:1]
-                pitanga.display_print(Font5x7, current_time[:6], show_decimals=True, decimal_dots=0x02)
+                decimal_dots_time_patterns =  decimal_dots_time_patterns[1:] + decimal_dots_time_patterns[:1]
+                pitanga.display_print(Font5x7, current_time[:6], show_decimals=True, decimal_dots=decimal_dots_time_patterns[0])
                 time.sleep(0.12)
         
             if display_menu == 1:
+                
                 if counter > 10:
                     temperature = ds1631.read_sensor()
                     temperature = 't=' + temperature + '  '
                     pitanga.display_print(Font5x7, temperature[:6], show_decimals=False, decimal_dots=0xf00)
                     counter = 0
+                decimal_dots = circular_left_rotate(decimal_dots, 1, 8)
+                pitanga.display_print(Font5x7, temperature[:6], show_decimals=True, decimal_dots=decimal_dots &0b00100000)
                 # # Show bitmap 
                 # pikachu_d = pikachu_d[1:] + pikachu_d[:1]
                 # pitanga.display_bitmap(pikachu_d)
@@ -397,12 +400,13 @@ def main():
                 counter = counter + 1
 
             if display_menu == 3:
-                current_time = datetime.now().strftime(" %H%M ")
+                # current_time = datetime.now().strftime(" %H%M ")
+                current_time = '      '
                 # Show time 
                 # Show running dots 
                 decimal_dots = circular_left_rotate(decimal_dots, 1, 8)
                 # decimal_dots = 0b00000011
-                pitanga.display_print(Font5x7, current_time, show_decimals=True, decimal_dots=decimal_dots & 0b0000111)
+                pitanga.display_print(Font5x7, current_time, show_decimals=True, decimal_dots=decimal_dots & 0b00111111)
                 time.sleep(0.12)
         else:
             if running > 0:

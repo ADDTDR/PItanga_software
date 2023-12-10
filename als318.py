@@ -6,7 +6,7 @@ HT16K33_ADDRESS_0 = 0x70
 HT16K33_CMD_BRIGHTNESS = 0xE0
 HT16K33_ENABLE_DISPLAY = 0x81
 HT16K33_TURN_ON_OSCILLATOR = 0x21
-LED_DRIVER_BRIGHTNESS_LEVEL = 6
+LED_DRIVER_BRIGHTNESS_LEVEL = 12
 
 class TinynumberHat():
 
@@ -26,7 +26,7 @@ class TinynumberHat():
 
 		# Fill with 1, turn on all segments 
 		self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, [0xff] * 16)
-		time.sleep(5.1)
+		time.sleep(0.1)
 		# Clear display 
 		self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, [0x00] * 16)
 
@@ -81,21 +81,17 @@ class TinynumberHat():
 			time_now =  datetime.now().strftime('%H-%M-%S%f')
 			# print(datetime.now().strftime('%H.%M.%S.%f'))
 			buffer[0] = self.numbers.get(time_now[0], 0b01000000)
-			buffer[1] = self.numbers.get(time_now[1], 0b01000000) 
+			buffer[2] = self.numbers.get(time_now[1], 0b01000000) 
 
-			buffer[2] = self.numbers.get(time_now[2], 0b01000000)
-			buffer[3] = self.numbers.get(time_now[3], 0b01000000) 
+			buffer[4] = self.numbers.get(time_now[2], 0b01000000)
+			buffer[6] = self.numbers.get(time_now[3], 0b01000000) 
 
-			buffer[4] = self.numbers.get(time_now[4], 0b01000000)
-			buffer[5] = self.numbers.get(time_now[5], 0b01000000) 
+			buffer[8] = self.numbers.get(time_now[4], 0b01000000)
+			buffer[10] = self.numbers.get(time_now[5], 0b01000000) 
 
-			buffer[6] = self.numbers.get(time_now[6], 0b01000000)
-			buffer[7] = self.numbers.get(time_now[7], 0b01000000) | 0b10000000 if i == True  else self.numbers.get(time_now[7], 0b01000000)
-<<<<<<< HEAD
-			buffer[8] = self.numbers.get(time_now[8], 0b01000000)
-=======
-			buffer[8] = self.numbers.get(time_now[8], 0b01000000) 
->>>>>>> a0a6b2fb5c476530c2a6705f864a25807cb30925
+			buffer[12] = self.numbers.get(time_now[6], 0b01000000)
+			buffer[14] = self.numbers.get(time_now[7], 0b01000000) | 0b10000000 if i == True  else self.numbers.get(time_now[7], 0b01000000)
+			# buffer[8] = self.numbers.get(time_now[8], 0b01000000) 
 			# buffer[0] = 0b00000011
 			#Write buffer 
 			self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, buffer)
