@@ -399,12 +399,12 @@ def main():
                 # pitanga.display_bitmap(pikachu_d)
                 #counter = counter + 1
                 decimal_dots = circular_left_rotate(decimal_dots, 1, 8)
-                pitanga.display_print(Font5x7, '       ', show_decimals=True, decimal_dots=decimal_dots & 0b0000111)
+                pitanga.display_print(Font5x7, '       ', show_decimals=True, decimal_dots=decimal_dots & 0b00111111)
                 time.sleep(0.12)
       
 
             if display_menu == 2:
-                # Show text 
+                # Show jockes text 
                 display_string = display_string[1:] + display_string[:1]
                 pitanga.display_print(Font5x7, display_string[:6], show_decimals=False)
                 time.sleep(0.1)
