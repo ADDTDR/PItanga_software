@@ -375,11 +375,12 @@ def main():
     
         if running == 0:
             if display_menu == 0:
-                current_time = datetime.now().strftime("%H%M%SS")
+                # current_time = datetime.now().strftime("%H%M%SS")
+                print('GPS CLOCK',  os.environ.get('GPS_CLOCK'))
                 # Show time 
                 # Circular rotate decimals pattern 
-                # decimal_dots_time_patterns =  decimal_dots_time_patterns[1:] + decimal_dots_time_patterns[:1]
-                pitanga.display_print(Font5x7, current_time[:6], show_decimals=True, decimal_dots=0x02)
+                decimal_dots_time_patterns =  decimal_dots_time_patterns[1:] + decimal_dots_time_patterns[:1]
+                pitanga.display_print(Font5x7, current_time[:6], show_decimals=True, decimal_dots=decimal_dots_time_patterns[0])
                 time.sleep(0.12)
         
             if display_menu == 1:
@@ -413,7 +414,7 @@ def main():
 
             if display_menu == 3:
                 current_time = datetime.now().strftime(" %H%M ")
-                print('GPS CLOCK',  os.environ.get('GPS_CLOCK'))
+                
                 # Show time 
                 # Show running dots 
                 decimal_dots = circular_left_rotate(decimal_dots, 1, 8)
