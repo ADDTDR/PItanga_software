@@ -328,7 +328,7 @@ def main():
     display_string = display_string.replace('\n', '')
 
     pikachu_d = pikachu_bitmap
-    display_menu = 3
+    display_menu = 0
     counter = 0
 
     pitanga  = Pitanga()
@@ -378,12 +378,9 @@ def main():
                 gmt = 2
                 # current_time = datetime.now().strftime("%H%M%SS")
                 gps_time = os.environ.get('GPS_CLOCK', '00:00:00')
-                gps_time_parts  = gps_time.split(':')
-                print(gps_time_parts)
-                print('GPS CLOCK',  os.environ.get('GPS_CLOCK'))
-
-                current_time = str( int(gps_time_parts[0]) + gmt ) + gps_time_parts[1] + gps_time_parts[2]
-                
+                gps_time_parts  = gps_time.split(':')                
+                current_time = '{0:02d}'.format( int(gps_time_parts[0]) + gmt ) + gps_time_parts[1] + gps_time_parts[2]
+                # print('curent time', current_time)  
                 # Circular rotate decimals pattern 
                 decimal_dots_time_patterns =  decimal_dots_time_patterns[1:] + decimal_dots_time_patterns[:1]
                 # Show time 
