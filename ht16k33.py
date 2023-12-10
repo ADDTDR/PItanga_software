@@ -1,12 +1,14 @@
 from smbus import SMBus
 import time
 import random 
+import os
 from font5x7 import Font5x7_90 as Font5x7
 from datetime import datetime
 from pikachu import pikachu as pikachu_bitmap
 from ds1631 import Ds1631
 import random 
 from tinynumberhat import TinynumberHat
+from serial_reader import GpsSerialReader
 import threading 
 
 HT16K33_ADDRESS_0 = 0x72
@@ -22,6 +24,9 @@ JOKES_FILE = 'jokes.txt'
 # t = threading.Thread(name='tinynumberhat', target=tinynumberhat.shoe_time)
 # t.start()
 
+gps_serial_reader = GpsSerialReader()
+gps_time_thread = threading.Thread(name='gps_serial_reader', target=gps_serial_reader.read_serial_gps_device)
+gps_time_thread.start()
 
 class HT16K33():
 
@@ -408,6 +413,7 @@ def main():
 
             if display_menu == 3:
                 current_time = datetime.now().strftime(" %H%M ")
+                print('GPS CLOCK',  os.environ.get('GPS_CLOCK'))
                 # Show time 
                 # Show running dots 
                 decimal_dots = circular_left_rotate(decimal_dots, 1, 8)

@@ -91,11 +91,7 @@ class TinynumberHat():
 
 			buffer[6] = self.numbers.get(time_now[6], 0b01000000)
 			buffer[7] = self.numbers.get(time_now[7], 0b01000000) | 0b10000000 if i == True  else self.numbers.get(time_now[7], 0b01000000)
-<<<<<<< HEAD
-			buffer[8] = self.numbers.get(time_now[8], 0b01000000)
-=======
 			buffer[8] = self.numbers.get(time_now[8], 0b01000000) 
->>>>>>> a0a6b2fb5c476530c2a6705f864a25807cb30925
 			# buffer[0] = 0b00000011
 			#Write buffer 
 			self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, buffer)
