@@ -379,6 +379,7 @@ def main():
                 # current_time = datetime.now().strftime("%H%M%SS")
                 gps_time = os.environ.get('GPS_CLOCK', '00:00:00')
                 gps_time_parts  = gps_time.split(':')
+                print(gps_time_parts)
                 print('GPS CLOCK',  os.environ.get('GPS_CLOCK'))
 
                 current_time = str( int(gps_time_parts[0]) + gmt ) + gps_time_parts[1] + gps_time_parts[2]
