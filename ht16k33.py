@@ -18,9 +18,9 @@ HT16K33_ENABLE_DISPLAY = 0x81
 HT16K33_TURN_ON_OSCILLATOR = 0x21
 LED_DRIVER_BRIGHTNESS_LEVEL = 5
 JOKES_FILE = 'jokes.txt'
-tinynumberhat = TinynumberHat()
-t = threading.Thread(name='tinynumberhat', target=tinynumberhat.shoe_time)
-t.start()
+# tinynumberhat = TinynumberHat()
+# t = threading.Thread(name='tinynumberhat', target=tinynumberhat.shoe_time)
+# t.start()
 
 
 class HT16K33():
@@ -412,7 +412,7 @@ def main():
                 # Show running dots 
                 decimal_dots = circular_left_rotate(decimal_dots, 1, 8)
                 # decimal_dots = 0b00000011
-                pitanga.display_print(Font5x7, current_time, show_decimals=True, decimal_dots=decimal_dots & 0b0000111)
+                pitanga.display_print(Font5x7, current_time, show_decimals=True, decimal_dots=decimal_dots & 0b0000100)
                 time.sleep(0.12)
         else:
             if running > 0:
