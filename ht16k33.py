@@ -379,7 +379,8 @@ def main():
                 # current_time = datetime.now().strftime("%H%M%SS")
                 gps_time = os.environ.get('GPS_CLOCK', '00:00:00')
                 gps_time_parts  = gps_time.split(':')                
-                current_time = '{0:02d}'.format( int(gps_time_parts[0]) + gmt ) + gps_time_parts[1] + gps_time_parts[2]
+                
+                current_time = '{0:02d}'.format( (int(gps_time_parts[0]) + gmt) % 24 ) + gps_time_parts[1] + gps_time_parts[2]
                 # print('curent time', current_time)  
                 # Circular rotate decimals pattern 
                 decimal_dots_time_patterns =  decimal_dots_time_patterns[1:] + decimal_dots_time_patterns[:1]
