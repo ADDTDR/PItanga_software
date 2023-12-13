@@ -6,7 +6,8 @@ SAA1064_ADDRESS = 0x38
 
 bus = SMBus(2)
 
-'''C0 = 0 static mode, i.e. continuous display of digits 1 and 2
+'''
+C0 = 0 static mode, i.e. continuous display of digits 1 and 2
 C0 = 1 dynamic mode, i.e. alternating display of digit 1 + 3 and 2 + 4
 C1 = 0/1 digits 1 + 3 are blanked/not blanked
 C2 = 0/1 digits 2 + 4 are blanked/not blanked
@@ -21,7 +22,7 @@ Byte order:
 
 
 #Config Driver 
-CONTROL_REG = 0b01010000
+CONTROL_REG = 0b01110111
 bus.write_i2c_block_data(SAA1064_ADDRESS, 0x00, [CONTROL_REG])
 
 
@@ -62,10 +63,10 @@ while True:
     time_str = datetime.now().strftime(" %H.%M ") 
     # print(time_str)
 
-    for key in time_str:
-        digit_1 = digit_font.get(key, 0x00)
-        bus.write_i2c_block_data(SAA1064_ADDRESS, 0x01, [digit_1, 0x00, 0x00, 0x00])
-        time.sleep(0.15)
+    # for key in time_str:
+    #     digit_1 = digit_font.get(key, 0x00)
+    #     bus.write_i2c_block_data(SAA1064_ADDRESS, 0x01, [digit_1, 0x00, 0x00, 0x00])
+    #     time.sleep(0.15)
     # time.sleep(0.5)
     # for key in 'PLAY ':
     #     digit_1 = digit_font.get(key, 0x00)
@@ -79,11 +80,13 @@ while True:
     #     time.sleep(0.25)
     # time.sleep(2)
 
-    # for key in '1234567890. ':
-    #     digit_1 = digit_font.get(key, 0x00)
-    #     bus.write_i2c_block_data(SAA1064_ADDRESS, 0x01, [digit_1, 0x00, 0x00, 0x00])
-    #     time.sleep(0.25)
-    # time.sleep(1)
+    for key in '1234567890. ':
+        digit_1 = digit_font.get('1', 0x00)
+        digit_2 = digit_font.get('2', 0x00)
+        bus.write_i2c_block_data(SAA1064_ADDRESS, 0x01, [digit_1, digit_2, 0b00111111, 0b00111111])
+        time.sleep(0.25)
+        bus.write_i2c_block_data(SAA1064_ADDRESS, 0x01, [0x00, 0x00, 0x00, 0x00])
+    time.sleep(1)
     
     # for key in 'STOP ':
     #     digit_1 = digit_font.get(key, 0x00)
