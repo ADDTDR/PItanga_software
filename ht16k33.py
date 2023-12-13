@@ -1,12 +1,14 @@
 from smbus import SMBus
 import time
 import random 
+import os
 from font5x7 import Font5x7_90 as Font5x7
 from datetime import datetime
 from pikachu import pikachu as pikachu_bitmap
 from ds1631 import Ds1631
 import random 
 from tinynumberhat import TinynumberHat
+from serial_reader import GpsSerialReader
 import threading 
 
 HT16K33_ADDRESS_0 = 0x72
@@ -18,10 +20,13 @@ HT16K33_ENABLE_DISPLAY = 0x81
 HT16K33_TURN_ON_OSCILLATOR = 0x21
 LED_DRIVER_BRIGHTNESS_LEVEL = 5
 JOKES_FILE = 'jokes.txt'
-tinynumberhat = TinynumberHat()
-t = threading.Thread(name='tinynumberhat', target=tinynumberhat.shoe_time)
-t.start()
+# tinynumberhat = TinynumberHat()
+# t = threading.Thread(name='tinynumberhat', target=tinynumberhat.shoe_time)
+# t.start()
 
+gps_serial_reader = GpsSerialReader()
+gps_time_thread = threading.Thread(name='gps_serial_reader', target=gps_serial_reader.read_serial_gps_device)
+gps_time_thread.start()
 
 class HT16K33():
 
@@ -323,7 +328,7 @@ def main():
     display_string = display_string.replace('\n', '')
 
     pikachu_d = pikachu_bitmap
-    display_menu = 3
+    display_menu = 0
     counter = 0
 
     pitanga  = Pitanga()
@@ -370,11 +375,17 @@ def main():
     
         if running == 0:
             if display_menu == 0:
-                current_time = datetime.now().strftime("%H%M%SS")
-                # Show time 
+                gmt = 2
+                # current_time = datetime.now().strftime("%H%M%SS")
+                gps_time = os.environ.get('GPS_CLOCK', '00:00:00')
+                gps_time_parts  = gps_time.split(':')                
+                
+                current_time = '{0:02d}'.format( (int(gps_time_parts[0]) + gmt) % 24 ) + gps_time_parts[1] + gps_time_parts[2]
+                # print('curent time', current_time)  
                 # Circular rotate decimals pattern 
-                # decimal_dots_time_patterns =  decimal_dots_time_patterns[1:] + decimal_dots_time_patterns[:1]
-                pitanga.display_print(Font5x7, current_time[:6], show_decimals=True, decimal_dots=0x02)
+                decimal_dots_time_patterns =  decimal_dots_time_patterns[1:] + decimal_dots_time_patterns[:1]
+                # Show time 
+                pitanga.display_print(Font5x7, current_time[:6], show_decimals=True, decimal_dots=decimal_dots_time_patterns[0])
                 time.sleep(0.12)
         
             if display_menu == 1:
@@ -389,12 +400,12 @@ def main():
                 # pitanga.display_bitmap(pikachu_d)
                 #counter = counter + 1
                 decimal_dots = circular_left_rotate(decimal_dots, 1, 8)
-                pitanga.display_print(Font5x7, '       ', show_decimals=True, decimal_dots=decimal_dots & 0b0000111)
+                pitanga.display_print(Font5x7, '       ', show_decimals=True, decimal_dots=decimal_dots & 0b00111111)
                 time.sleep(0.12)
       
 
             if display_menu == 2:
-                # Show text 
+                # Show jockes text 
                 display_string = display_string[1:] + display_string[:1]
                 pitanga.display_print(Font5x7, display_string[:6], show_decimals=False)
                 time.sleep(0.1)
@@ -408,11 +419,12 @@ def main():
 
             if display_menu == 3:
                 current_time = datetime.now().strftime(" %H%M ")
+                
                 # Show time 
                 # Show running dots 
                 decimal_dots = circular_left_rotate(decimal_dots, 1, 8)
                 # decimal_dots = 0b00000011
-                pitanga.display_print(Font5x7, current_time, show_decimals=True, decimal_dots=decimal_dots & 0b0000111)
+                pitanga.display_print(Font5x7, current_time, show_decimals=True, decimal_dots=decimal_dots & 0b0000100)
                 time.sleep(0.12)
         else:
             if running > 0:
