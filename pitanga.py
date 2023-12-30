@@ -20,7 +20,7 @@ JOKES_FILE = 'jokes.txt'
 class HT16K33():
 
     def __init__(self, ht16k33_i2c_address):
-        bus = SMBus(2)
+        bus = SMBus(1)
         # Turn on oscillator 
         bus.write_byte(ht16k33_i2c_address, HT16K33_TURN_ON_OSCILLATOR)
         # Enable display (no blinking mode)
