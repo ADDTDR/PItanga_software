@@ -373,17 +373,10 @@ def main(led_driver_0, led_driver_1):
         
             if display_menu == 1:
                 
-                if counter > 10:
-                    temperature = ds1631.read_sensor()
-                    temperature = 't=' + temperature + '  '
-                    pitanga.display_print(Font5x7, temperature[:6], show_decimals=False, decimal_dots=0xf00)
-                    counter = 0
-                decimal_dots = circular_left_rotate(decimal_dots, 1, 8)
-                pitanga.display_print(Font5x7, temperature[:6], show_decimals=True, decimal_dots=decimal_dots &0b00100000)
                 # # Show bitmap 
-                # pikachu_d = pikachu_d[1:] + pikachu_d[:1]
-                # pitanga.display_bitmap(pikachu_d)
-                counter = counter + 1
+                pikachu_d = pikachu_d[1:] + pikachu_d[:1]
+                pitanga.display_bitmap(pikachu_d)
+
                 time.sleep(0.12)
       
 
@@ -416,5 +409,5 @@ def main(led_driver_0, led_driver_1):
 
 if __name__ == '__main__':
     print(sys.argv[1], sys.argv[2])
-    led_driver_address = [sys.argv[1], sys.argv[2]]
+    led_driver_address = [ int(sys.argv[1], 16), int(sys.argv[2], 16)]
     main(led_driver_0=led_driver_address[0], led_driver_1=led_driver_address[1])
