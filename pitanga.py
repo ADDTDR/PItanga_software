@@ -415,4 +415,5 @@ def main():
                 time.sleep(0.08)
 
 if __name__ == '__main__':
+    print(sys.argv[1], sys.argv[2])
     main()
