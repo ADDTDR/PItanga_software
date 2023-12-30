@@ -1,6 +1,7 @@
 from smbus import SMBus
 import time
 import random 
+import sys
 from font5x7 import Font5x7_90 as Font5x7
 from datetime import datetime
 from pikachu import pikachu as pikachu_bitmap
