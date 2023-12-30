@@ -215,13 +215,13 @@ class HT16K33():
 
 
 
-class Pitanga():
+class Pitanga( ):
 
-    def __init__(self):
+    def __init__(self, ht16k33_i2c_address_0 = HT16K33_ADDRESS_0, ht16k33_i2c_address_1=HT16K33_ADDRESS_1):
         # Initialise drivers 
-        self.led_driver_1 = HT16K33(ht16k33_i2c_address=HT16K33_ADDRESS_1)
+        self.led_driver_1 = HT16K33(ht16k33_i2c_address=ht16k33_i2c_address_0)
         self.led_driver_1.clear()
-        self.led_driver_0 = HT16K33(ht16k33_i2c_address=HT16K33_ADDRESS_0)
+        self.led_driver_0 = HT16K33(ht16k33_i2c_address=ht16k33_i2c_address_1)
         self.led_driver_0.clear()
         self.brightness = LED_DRIVER_BRIGHTNESS_LEVEL
 
@@ -305,7 +305,7 @@ class Pitanga():
         self.led_driver_0.set_brightness(brightness=self.brightness)
         self.led_driver_1.set_brightness(brightness=self.brightness)
 
-def main():
+def main(led_driver_0, led_driver_1):
 
     ds1631 = Ds1631()
     with open(JOKES_FILE, 'r') as file:
@@ -319,7 +319,7 @@ def main():
     display_menu = 3
     counter = 0
 
-    pitanga  = Pitanga()
+    pitanga  = Pitanga(ht16k33_i2c_address_0=led_driver_0, ht16k33_i2c_address_1=led_driver_1)
     decimal_dots = 0b00000101
     # Dots  will alternate between values
     decimal_dots_time_patterns = [0b00001010, 0b00000000]
@@ -416,4 +416,5 @@ def main():
 
 if __name__ == '__main__':
     print(sys.argv[1], sys.argv[2])
-    main()
+    led_driver_address = [sys.argv[1], sys.argv[2]]
+    main(led_driver_0=led_driver_address[0], led_driver_1=led_driver_address[1])
