@@ -5,7 +5,7 @@ import sys
 from font5x7 import Font5x7_90 as Font5x7
 from datetime import datetime
 from pikachu import pikachu as pikachu_bitmap
-from ds1631 import Ds1631
+#from ds1631 import Ds1631
 
 HT16K33_ADDRESS_0 = 0x70
 HT16K33_ADDRESS_1 = 0x71
@@ -20,7 +20,11 @@ JOKES_FILE = 'jokes.txt'
 class HT16K33():
 
     def __init__(self, ht16k33_i2c_address):
+<<<<<<< Updated upstream
         bus = SMBus(1)
+=======
+        bus = SMBus(0)
+>>>>>>> Stashed changes
         # Turn on oscillator 
         bus.write_byte(ht16k33_i2c_address, HT16K33_TURN_ON_OSCILLATOR)
         # Enable display (no blinking mode)
@@ -307,7 +311,7 @@ class Pitanga( ):
 
 def main(led_driver_0, led_driver_1):
 
-    ds1631 = Ds1631()
+    #ds1631 = Ds1631()
     with open(JOKES_FILE, 'r') as file:
         # Read all the lines into a list
         lines = file.readlines()
@@ -373,10 +377,24 @@ def main(led_driver_0, led_driver_1):
         
             if display_menu == 1:
                 
+<<<<<<< Updated upstream
                 # # Show bitmap 
                 pikachu_d = pikachu_d[1:] + pikachu_d[:1]
                 pitanga.display_bitmap(pikachu_d)
 
+=======
+                #if counter > 10:
+                #    temperature = ds1631.read_sensor()
+                #    temperature = 't=' + temperature + '  '
+                #    pitanga.display_print(Font5x7, temperature[:6], show_decimals=False, decimal_dots=0xf00)
+                #    counter = 0
+                #decimal_dots = circular_left_rotate(decimal_dots, 1, 8)
+                #pitanga.display_print(Font5x7, temperature[:6], show_decimals=True, decimal_dots=decimal_dots &0b00100000)
+                # # Show bitmap 
+                pikachu_d = pikachu_d[1:] + pikachu_d[:1]
+                pitanga.display_bitmap(pikachu_d)
+                #counter = counter + 1
+>>>>>>> Stashed changes
                 time.sleep(0.12)
       
 

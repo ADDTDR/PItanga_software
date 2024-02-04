@@ -11,8 +11,9 @@ from tinynumberhat import TinynumberHat
 from serial_reader import GpsSerialReader
 import threading 
 
-HT16K33_ADDRESS_0 = 0x72
-HT16K33_ADDRESS_1 = 0x73
+GMT = 1
+HT16K33_ADDRESS_0 = 0x70
+HT16K33_ADDRESS_1 = 0x71
 
 
 HT16K33_CMD_BRIGHTNESS = 0xE0
@@ -23,10 +24,12 @@ JOKES_FILE = 'jokes.txt'
 # tinynumberhat = TinynumberHat()
 # t = threading.Thread(name='tinynumberhat', target=tinynumberhat.shoe_time)
 # t.start()
-
-gps_serial_reader = GpsSerialReader()
-gps_time_thread = threading.Thread(name='gps_serial_reader', target=gps_serial_reader.read_serial_gps_device)
-gps_time_thread.start()
+try:
+    gps_serial_reader = GpsSerialReader()
+    gps_time_thread = threading.Thread(name='gps_serial_reader', target=gps_serial_reader.read_serial_gps_device)
+    gps_time_thread.start()
+except:
+    print('No gps clock')
 
 class HT16K33():
 
@@ -375,7 +378,7 @@ def main():
     
         if running == 0:
             if display_menu == 0:
-                gmt = 2
+                gmt = GMT
                 # current_time = datetime.now().strftime("%H%M%SS")
                 gps_time = os.environ.get('GPS_CLOCK', '00:00:00')
                 gps_time_parts  = gps_time.split(':')                
