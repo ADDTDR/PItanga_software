@@ -1,6 +1,7 @@
 from smbus import SMBus
 import time
 import random 
+import sys
 from font5x7 import Font5x7_90 as Font5x7
 from datetime import datetime
 from pikachu import pikachu as pikachu_bitmap
@@ -19,7 +20,7 @@ JOKES_FILE = 'jokes.txt'
 class HT16K33():
 
     def __init__(self, ht16k33_i2c_address):
-        bus = SMBus(2)
+        bus = SMBus(1)
         # Turn on oscillator 
         bus.write_byte(ht16k33_i2c_address, HT16K33_TURN_ON_OSCILLATOR)
         # Enable display (no blinking mode)
@@ -214,13 +215,13 @@ class HT16K33():
 
 
 
-class Pitanga():
+class Pitanga( ):
 
-    def __init__(self):
+    def __init__(self, ht16k33_i2c_address_0 = HT16K33_ADDRESS_0, ht16k33_i2c_address_1=HT16K33_ADDRESS_1):
         # Initialise drivers 
-        self.led_driver_1 = HT16K33(ht16k33_i2c_address=HT16K33_ADDRESS_1)
+        self.led_driver_1 = HT16K33(ht16k33_i2c_address=ht16k33_i2c_address_0)
         self.led_driver_1.clear()
-        self.led_driver_0 = HT16K33(ht16k33_i2c_address=HT16K33_ADDRESS_0)
+        self.led_driver_0 = HT16K33(ht16k33_i2c_address=ht16k33_i2c_address_1)
         self.led_driver_0.clear()
         self.brightness = LED_DRIVER_BRIGHTNESS_LEVEL
 
@@ -304,7 +305,7 @@ class Pitanga():
         self.led_driver_0.set_brightness(brightness=self.brightness)
         self.led_driver_1.set_brightness(brightness=self.brightness)
 
-def main():
+def main(led_driver_0, led_driver_1):
 
     ds1631 = Ds1631()
     with open(JOKES_FILE, 'r') as file:
@@ -318,7 +319,7 @@ def main():
     display_menu = 3
     counter = 0
 
-    pitanga  = Pitanga()
+    pitanga  = Pitanga(ht16k33_i2c_address_0=led_driver_0, ht16k33_i2c_address_1=led_driver_1)
     decimal_dots = 0b00000101
     # Dots  will alternate between values
     decimal_dots_time_patterns = [0b00001010, 0b00000000]
@@ -372,17 +373,10 @@ def main():
         
             if display_menu == 1:
                 
-                if counter > 10:
-                    temperature = ds1631.read_sensor()
-                    temperature = 't=' + temperature + '  '
-                    pitanga.display_print(Font5x7, temperature[:6], show_decimals=False, decimal_dots=0xf00)
-                    counter = 0
-                decimal_dots = circular_left_rotate(decimal_dots, 1, 8)
-                pitanga.display_print(Font5x7, temperature[:6], show_decimals=True, decimal_dots=decimal_dots &0b00100000)
                 # # Show bitmap 
-                # pikachu_d = pikachu_d[1:] + pikachu_d[:1]
-                # pitanga.display_bitmap(pikachu_d)
-                counter = counter + 1
+                pikachu_d = pikachu_d[1:] + pikachu_d[:1]
+                pitanga.display_bitmap(pikachu_d)
+
                 time.sleep(0.12)
       
 
@@ -414,4 +408,6 @@ def main():
                 time.sleep(0.08)
 
 if __name__ == '__main__':
-    main()
+    print(sys.argv[1], sys.argv[2])
+    led_driver_address = [ int(sys.argv[1], 16), int(sys.argv[2], 16)]
+    main(led_driver_0=led_driver_address[0], led_driver_1=led_driver_address[1])
