@@ -1,1 +1,6 @@
 __pycache__
+*.pv~
+*.pw~
+*.pyc
+*.py.swn
+*.py.swo
