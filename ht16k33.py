@@ -261,7 +261,7 @@ class Pitanga():
 
     # Display string 6 char
     def display_print(self, font, str_data, show_decimals=False, decimal_dots=0x00, update_leds=True):
-
+        str_data = str_data[::-1]
         font_first_char = 0x20
         bx = [0,0,0,0,0,0]
    
@@ -422,7 +422,6 @@ def main():
 
             if display_menu == 3:
                 current_time = datetime.now().strftime(" %H%M ")
-                current_time = current_time[::-1]               
                 # Show time 
                 # Show running dots 
                 decimal_dots = circular_left_rotate(decimal_dots, 1, 8)
