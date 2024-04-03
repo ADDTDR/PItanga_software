@@ -7,7 +7,7 @@ from datetime import datetime
 from pikachu import pikachu as pikachu_bitmap
 from ds1631 import Ds1631
 import random 
-from tinynumberhat import TinynumberHat
+#from tinynumberhat import TinynumberHat
 from serial_reader import GpsSerialReader
 import threading 
 
@@ -34,7 +34,7 @@ except:
 class HT16K33():
 
     def __init__(self, ht16k33_i2c_address):
-        bus = SMBus(0)
+        bus = SMBus(1)
         # Turn on oscillator 
         bus.write_byte(ht16k33_i2c_address, HT16K33_TURN_ON_OSCILLATOR)
         # Enable display (no blinking mode)
@@ -243,12 +243,21 @@ class Pitanga():
     def rotate_90(self, a):
         b = []
         for k in range(0, 7):           
-            q = [(x & (1 << k)) >> k for x in a ]
+            q = [(x & ( 1 << k ) ) >> k for x  in a]
             qi = 0
             for bit in q:    
-                qi = (qi << 1) | bit
+                qi =  (qi << 1)  | bit
             b.append(qi)
         return b
+
+    def reverse_bits(self, num):
+        num_bits = 5
+        reversed_num = 0
+        for i in range(num_bits):
+            reversed_num = reversed_num << 1
+            reversed_num = reversed_num | (num & 1)
+            num = num >> 1
+        return reversed_num
 
     # Display string 6 char
     def display_print(self, font, str_data, show_decimals=False, decimal_dots=0x00, update_leds=True):
@@ -256,23 +265,14 @@ class Pitanga():
         font_first_char = 0x20
         bx = [0,0,0,0,0,0]
    
-
-        bx[0] = font[ord(str_data[5])- font_first_char]
-        bx[1] = font[ord(str_data[4])- font_first_char]
-        bx[2] = font[ord(str_data[3])- font_first_char]
-        bx[3] = font[ord(str_data[2])- font_first_char]
-        bx[4] = font[ord(str_data[1])- font_first_char]
-        bx[5] = font[ord(str_data[0])- font_first_char]
-
-        raw_data = []
-        for e in bx:
-            ds = []
-            for line in e:
-                binary_string = '{0:05b}'.format(line)
-                # Convert the binary string to a binary array
-                binary_array = [int(bit) for bit in binary_string]
-                ds.append(binary_array)
-            raw_data.append(ds)
+        bx[0] =  [ self.reverse_bits(y) for y in font[ord(str_data[5])- font_first_char][::-1] ]
+        bx[1] =  [ self.reverse_bits(y) for y in font[ord(str_data[4])- font_first_char][::-1] ]
+        bx[2] =  [ self.reverse_bits(y) for y in font[ord(str_data[3])- font_first_char][::-1] ]
+        bx[3] =  [ self.reverse_bits(y) for y in font[ord(str_data[2])- font_first_char][::-1] ]
+        bx[4] =  [ self.reverse_bits(y) for y in font[ord(str_data[1])- font_first_char][::-1] ]
+        bx[5] =  [ self.reverse_bits(y) for y in font[ord(str_data[0])- font_first_char][::-1] ]
+        
+        
 
 
         if update_leds:
@@ -284,7 +284,7 @@ class Pitanga():
             # Write data  led driver 0
             self.led_driver_0.write_data_raw(bx[3], bx[4], bx[5], show_decimals, (decimal_dots  & 0b00111000) >> 3)
 
-        return raw_data
+        return []
 
 
     def display_bitmap(self, bitmap):
@@ -331,7 +331,7 @@ def main():
     display_string = display_string.replace('\n', '')
 
     pikachu_d = pikachu_bitmap
-    display_menu = 0
+    display_menu = 3
     counter = 0
 
     pitanga  = Pitanga()
@@ -422,7 +422,7 @@ def main():
 
             if display_menu == 3:
                 current_time = datetime.now().strftime(" %H%M ")
-                
+                current_time = current_time[::-1]               
                 # Show time 
                 # Show running dots 
                 decimal_dots = circular_left_rotate(decimal_dots, 1, 8)

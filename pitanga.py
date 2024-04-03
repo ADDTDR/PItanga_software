@@ -20,11 +20,7 @@ JOKES_FILE = 'jokes.txt'
 class HT16K33():
 
     def __init__(self, ht16k33_i2c_address):
-<<<<<<< Updated upstream
         bus = SMBus(1)
-=======
-        bus = SMBus(0)
->>>>>>> Stashed changes
         # Turn on oscillator 
         bus.write_byte(ht16k33_i2c_address, HT16K33_TURN_ON_OSCILLATOR)
         # Enable display (no blinking mode)
@@ -320,7 +316,7 @@ def main(led_driver_0, led_driver_1):
     display_string = display_string.replace('\n', '')
 
     pikachu_d = pikachu_bitmap
-    display_menu = 3
+    display_menu = 1
     counter = 0
 
     pitanga  = Pitanga(ht16k33_i2c_address_0=led_driver_0, ht16k33_i2c_address_1=led_driver_1)
@@ -377,12 +373,9 @@ def main(led_driver_0, led_driver_1):
         
             if display_menu == 1:
                 
-<<<<<<< Updated upstream
                 # # Show bitmap 
                 pikachu_d = pikachu_d[1:] + pikachu_d[:1]
                 pitanga.display_bitmap(pikachu_d)
-
-=======
                 #if counter > 10:
                 #    temperature = ds1631.read_sensor()
                 #    temperature = 't=' + temperature + '  '
@@ -394,7 +387,6 @@ def main(led_driver_0, led_driver_1):
                 pikachu_d = pikachu_d[1:] + pikachu_d[:1]
                 pitanga.display_bitmap(pikachu_d)
                 #counter = counter + 1
->>>>>>> Stashed changes
                 time.sleep(0.12)
       
 

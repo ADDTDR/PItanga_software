@@ -12,7 +12,7 @@ class TinynumberHat():
 
 	def __init__(self) -> None:
 		
-		self.bus = SMBus(2)
+		self.bus = SMBus(1)
 		self.ht16k33_i2c_address = HT16K33_ADDRESS_0
 
 		# Turn on oscillator 
