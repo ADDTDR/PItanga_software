@@ -2,7 +2,7 @@ from smbus import SMBus
 import time
 import random 
 import os
-from font5x7 import Font5x7_90 as Font5x7
+from font5x7 import Font5x7_180 as Font5x7
 from datetime import datetime
 from pikachu import pikachu as pikachu_bitmap
 from ds1631 import Ds1631
@@ -265,16 +265,14 @@ class Pitanga():
         font_first_char = 0x20
         bx = [0,0,0,0,0,0]
    
-        bx[0] =  [ self.reverse_bits(y) for y in font[ord(str_data[5])- font_first_char][::-1] ]
-        bx[1] =  [ self.reverse_bits(y) for y in font[ord(str_data[4])- font_first_char][::-1] ]
-        bx[2] =  [ self.reverse_bits(y) for y in font[ord(str_data[3])- font_first_char][::-1] ]
-        bx[3] =  [ self.reverse_bits(y) for y in font[ord(str_data[2])- font_first_char][::-1] ]
-        bx[4] =  [ self.reverse_bits(y) for y in font[ord(str_data[1])- font_first_char][::-1] ]
-        bx[5] =  [ self.reverse_bits(y) for y in font[ord(str_data[0])- font_first_char][::-1] ]
+        bx[0] =  font[ord(str_data[5])- font_first_char] 
+        bx[1] =  font[ord(str_data[4])- font_first_char]
+        bx[2] =  font[ord(str_data[3])- font_first_char]
+        bx[3] =  font[ord(str_data[2])- font_first_char]
+        bx[4] =  font[ord(str_data[1])- font_first_char]
+        bx[5] =  font[ord(str_data[0])- font_first_char]
         
         
-
-
         if update_leds:
             #Clear buffer 
             self.led_driver_1.clear()
