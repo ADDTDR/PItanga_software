@@ -2,6 +2,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
+#include <pickachu.h>
 #include <linux/i2c-dev.h>
 #include <vector>
 #include <cstdlib>
