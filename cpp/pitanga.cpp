@@ -7,6 +7,7 @@
 #include <vector>
 #include <cstdlib>
 #include <ctime>
+#include <bitset>
 
 #define HT16K33_ADDRESS_0 0x70
 #define HT16K33_ADDRESS_1 0x71
@@ -86,6 +87,37 @@ int main() {
         return 1;
     }
 
+        std::cout << "Hello, World!" << std::endl;
+    for (const auto & i : pikachu) {
+        for (int j = 0; j < std::size(i); ++j) {
+            std::cout << i[j];
+        }
+    std::cout <<  std::endl;
+    }
+
+    std::cout << '\n' << '\n' << '\n';
+    uint8_t  buffer[16];
+
+    int start_line = 7;
+    int buffer_index = 0;
+
+    for (int line  = start_line; line  < start_line + 8; ++line ) {
+        buffer[buffer_index] = pikachu[line][0] << 7 | pikachu[line][1] << 6 | pikachu[line][2] << 5 | pikachu[line][3] << 4
+                | pikachu[line][4] << 3 | pikachu[line][5] << 2 | pikachu[line][6] << 1 | pikachu[line][7];
+
+        buffer[buffer_index + 1]  = pikachu[line][8] << 7 | pikachu[line][9] << 6 | pikachu[line][10] << 5 | pikachu[line][11] << 4
+                     | pikachu[line][12] << 3 | pikachu[line][13] << 2 | pikachu[line][14] << 1 | pikachu[line][15];
+        buffer_index = buffer_index + 2;
+        for (int j = 0; j < 16; ++j) {
+            std::cout << pikachu[line][j];
+        }
+        std::cout  << std::endl;
+    }
+    std::cout << std::endl << std::endl;
+    for (int i = 0; i < std::size(buffer); i = i + 2) {
+        std::cout << std::bitset<8>(buffer[i])  << std::bitset<8>(buffer[i + 1]) << std::endl;
+    }
+    
     // Generate random data and write to both LED drivers
     srand(time(NULL));
     while (true) {
