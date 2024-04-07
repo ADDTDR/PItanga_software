@@ -2,15 +2,16 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
-#include <pickachu.h>
+#include "pickachu.h"
 #include <linux/i2c-dev.h>
 #include <vector>
 #include <cstdlib>
 #include <ctime>
 #include <bitset>
+#include <iterator> 
 
-#define HT16K33_ADDRESS_0 0x70
-#define HT16K33_ADDRESS_1 0x71
+#define HT16K33_ADDRESS_0 0x72
+#define HT16K33_ADDRESS_1 0x73
 #define HT16K33_TURN_ON_OSCILLATOR 0x21
 #define HT16K33_ENABLE_DISPLAY 0x81
 #define HT16K33_CMD_BRIGHTNESS 0xE0
@@ -87,9 +88,9 @@ int main() {
         return 1;
     }
 
-        std::cout << "Hello, World!" << std::endl;
+    std::cout << "Hello, World!" << std::endl;
     for (const auto & i : pikachu) {
-        for (int j = 0; j < std::size(i); ++j) {
+        for (int j = 0; j < 30; ++j) {
             std::cout << i[j];
         }
     std::cout <<  std::endl;
@@ -98,33 +99,42 @@ int main() {
     std::cout << '\n' << '\n' << '\n';
     uint8_t  buffer[16];
 
-    int start_line = 7;
-    int buffer_index = 0;
 
-    for (int line  = start_line; line  < start_line + 8; ++line ) {
-        buffer[buffer_index] = pikachu[line][0] << 7 | pikachu[line][1] << 6 | pikachu[line][2] << 5 | pikachu[line][3] << 4
-                | pikachu[line][4] << 3 | pikachu[line][5] << 2 | pikachu[line][6] << 1 | pikachu[line][7];
-
-        buffer[buffer_index + 1]  = pikachu[line][8] << 7 | pikachu[line][9] << 6 | pikachu[line][10] << 5 | pikachu[line][11] << 4
-                     | pikachu[line][12] << 3 | pikachu[line][13] << 2 | pikachu[line][14] << 1 | pikachu[line][15];
-        buffer_index = buffer_index + 2;
-        for (int j = 0; j < 16; ++j) {
-            std::cout << pikachu[line][j];
-        }
-        std::cout  << std::endl;
-    }
-    std::cout << std::endl << std::endl;
-    for (int i = 0; i < std::size(buffer); i = i + 2) {
-        std::cout << std::bitset<8>(buffer[i])  << std::bitset<8>(buffer[i + 1]) << std::endl;
-    }
+   // Calculate the number of elements in the array
+   /* for (int i = 0; i < sizeof(buffer) / sizeof(uint8_t); i = i + 2) {
+        std::cout << std::bitset<8>(buffer[i]) << '|' << std::bitset<8>(buffer[i + 1]) << std::endl;
+    }*/
     
     // Generate random data and write to both LED drivers
     srand(time(NULL));
+    int start_line = 0;
     while (true) {
+
+    if (start_line < 20) 
+	    start_line ++;
+    else
+	    start_line = 0;
+    
+    int buffer_index = 0;
+
+    for (int line  = start_line; line  < start_line + 8; ++line ) {
+        buffer[buffer_index + 1] = pikachu[line][0] << 7 | pikachu[line][1] << 6 | pikachu[line][2] << 5 | pikachu[line][3] << 4
+                | pikachu[line][4] << 3 | pikachu[line][5] << 2 | pikachu[line][6] << 1 | pikachu[line][7];
+
+        buffer[buffer_index]  = pikachu[line][8] << 7 | pikachu[line][9] << 6 | pikachu[line][10] << 5 | pikachu[line][11] << 4
+                     | pikachu[line][12] << 3 | pikachu[line][13] << 2 | pikachu[line][14] << 1 | pikachu[line][15];
+        buffer_index = buffer_index + 2;
+       /* for (int j = 0; j < 16; ++j) {
+            std::cout << pikachu[line][j];
+        }
+        std::cout  << std::endl;
+	*/
+    }
+    
 
         std::vector<unsigned char> data(16);
         for (int j = 0; j < 16; ++j) {
-            data[j] = rand() % 256;
+            data[j] = buffer[j];
         }
 
         // Write data to the first LED driver
@@ -141,7 +151,7 @@ int main() {
 
         // Generate new random data for the second LED driver
         for (int j = 0; j < 16; ++j) {
-            data[j] = rand() % 256;
+            data[j] = 0x00;
         }
 
         // Write data to the second LED driver
