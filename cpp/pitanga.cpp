@@ -15,7 +15,37 @@
 #define HT16K33_TURN_ON_OSCILLATOR 0x21
 #define HT16K33_ENABLE_DISPLAY 0x81
 #define HT16K33_CMD_BRIGHTNESS 0xE0
-#define LED_DRIVER_BRIGHTNESS_LEVEL 0x0A
+#define LED_DRIVER_BRIGHTNESS_LEVEL 0x05
+void circularRotateVertical(uint8_t arr[][30], int numRows, int numCols);
+
+void circularRotateVertical(uint8_t (*arr)[30], int numRows, int numCols) {
+    uint8_t temp[numCols];
+    // Store the last row to temporary array
+    for (int i = 0; i < numCols; ++i) {
+        temp[i] = arr[numRows - 1][i];
+    }
+    // Shift all rows up by one position
+    for (int i = numRows - 1; i > 0; --i) {
+        for (int j = 0; j < numCols; ++j) {
+            arr[i][j] = arr[i - 1][j];
+        }
+    }
+    // Place the temporary array in the first row
+    for (int i = 0; i < numCols; ++i) {
+        arr[0][i] = temp[i];
+    }
+}
+
+const int ROWS = 30;
+const int COLS = 30;
+
+void generateRandomMatrix(uint8_t matrix[][COLS]) {
+    for (int i = 0; i < ROWS; ++i) {
+        for (int j = 0; j < COLS; ++j) {
+            matrix[i][j] = rand() % 2; // Generates 0 or 1 randomly
+        }
+    }
+}
 
 int main() {
     const char *device = "/dev/i2c-1"; // I2C bus device path
@@ -89,23 +119,26 @@ int main() {
     }
 
     std::cout << "Hello, World!" << std::endl;
-    for (const auto & i : pikachu) {
+	/*for (auto & i : pikachu) {
         for (int j = 0; j < 30; ++j) {
             std::cout << i[j];
         }
     std::cout <<  std::endl;
-    }
+    }*/
 
     std::cout << '\n' << '\n' << '\n';
     uint8_t  buffer[16] = {0};
     uint8_t  buffer2[16] = {0};
 
-    
+    uint8_t pikachu[ROWS][COLS];
+    generateRandomMatrix(pikachu);
     // Generate random data and write to both LED drivers
     srand(time(NULL));
     int start_line = 0;
     while (true) {
    
+    circularRotateVertical(pikachu, 30, 30);
+
     int buffer_index = 0;
     for (int line  = start_line; line  < start_line + 7; line ++ ) {
 	// 0x01 << 7 for dot #6    
@@ -153,7 +186,7 @@ int main() {
                 return 1;
             }
         }
-        usleep(1002000);
+        usleep(102000);
     }
 
     close(fd);
