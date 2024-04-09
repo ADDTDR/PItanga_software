@@ -48,6 +48,15 @@ void generateRandomMatrix(uint8_t matrix[][COLS]) {
     }
 }
 
+void displayMatrix(uint8_t matrix[][COLS]) {
+    for (int i = 0; i < ROWS; ++i) {
+        for (int j = 0; j < COLS; ++j) {
+            std::cout << matrix[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
 void numToBits(uint8_t num, bool  bits[8]){
     for (int i = 0; i < 8; ++i) {
         bits[i] = (num >> i) & 1;
@@ -154,11 +163,11 @@ int main() {
         std::string str =  std::string(6 - std::to_string(num).length(), '0') + std::to_string(num);
         for(char e : str){
                 // Render char
-                int i  = 0;
+                int x  = 0;
                 bool bits [5][8];
                 for(auto  & a: Font5x7_full[e-0x20]){
-                    numToBits(a, bits[i]);
-                    i++;
+                    numToBits(a, bits[x]);
+                    x++;
                 }
                     // Copy
                     // Wrap to function
@@ -176,13 +185,14 @@ int main() {
         int buffer_index = 0;
         for (int line  = start_line; line  < start_line + 7; line ++ ) {
             // 0x01 << 7 for dot #6    
-            buffer2[buffer_index + 1] = frameBuffer[line][0] << 6 | frameBuffer[line][1] << 5 | frameBuffer[line][2] << 4 | frameBuffer[line][3] << 3 | frameBuffer[line][4] << 2 | frameBuffer[line][5] << 1 | frameBuffer[line][6];
-            buffer2[buffer_index] = frameBuffer[line][7] << 7 |  frameBuffer[line][8] << 6 | frameBuffer[line][9] << 5 | frameBuffer[line][10] << 4 | frameBuffer[line][11] << 3 | frameBuffer[line][12] << 2 | frameBuffer[line][13] << 1 | frameBuffer[line][14];
+            buffer2[buffer_index + 1] = frameBuffer[line][0] << 6 | frameBuffer[line][1] << 5 | frameBuffer[line][2] << 4 | frameBuffer[line][3] << 3 |  frameBuffer[line][4] << 2  | frameBuffer[line][5] << 1  | frameBuffer[line][6];
+            buffer2[buffer_index] =     frameBuffer[line][7] << 7 | frameBuffer[line][8] << 6 | frameBuffer[line][9] << 5 | frameBuffer[line][10] << 4 | frameBuffer[line][11] << 3 | frameBuffer[line][12] << 2 | frameBuffer[line][13] << 1 | frameBuffer[line][14];
             buffer[buffer_index] = frameBuffer[line][29] | frameBuffer[line][28] << 1 | frameBuffer[line][27] << 2 | frameBuffer[line][26] << 3 | frameBuffer[line][25] << 4 | frameBuffer[line][24] << 5 | frameBuffer[line][23] << 6 | frameBuffer[line][22] << 7;        
             buffer[buffer_index + 1] = frameBuffer[line][21] | frameBuffer[line][20] << 1 | frameBuffer[line][19] << 2 | frameBuffer[line][18] << 3 | frameBuffer[line][17] << 4 | frameBuffer[line][16] << 5 | frameBuffer[line][15] << 6;
             buffer_index = buffer_index + 2;
         }
-        
+            
+        displayMatrix(frameBuffer);
 
         // TODO remove unnecessary copy 
         std::vector<unsigned char> data(16);
@@ -219,7 +229,7 @@ int main() {
                 return 1;
             }
         }
-        usleep(102000);
+        usleep(10002000);
     }
 
     close(fd);
