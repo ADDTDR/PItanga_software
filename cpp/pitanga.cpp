@@ -2,13 +2,14 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
-#include "pickachu.h"
+#include <string.h>
 #include <linux/i2c-dev.h>
 #include <vector>
 #include <cstdlib>
 #include <ctime>
 #include <bitset>
-#include <iterator> 
+#include <iterator>
+#include "fonts.h" 
 
 #define HT16K33_ADDRESS_0 0x72
 #define HT16K33_ADDRESS_1 0x73
@@ -44,6 +45,12 @@ void generateRandomMatrix(uint8_t matrix[][COLS]) {
         for (int j = 0; j < COLS; ++j) {
             matrix[i][j] = rand() % 2; // Generates 0 or 1 randomly
         }
+    }
+}
+
+void numToBits(uint8_t num, bool  bits[8]){
+    for (int i = 0; i < 8; ++i) {
+        bits[i] = (num >> i) & 1;
     }
 }
 
@@ -118,41 +125,67 @@ int main() {
         return 1;
     }
 
-    std::cout << "Hello, World!" << std::endl;
-	/*for (auto & i : pikachu) {
-        for (int j = 0; j < 30; ++j) {
-            std::cout << i[j];
-        }
-    std::cout <<  std::endl;
-    }*/
+    std::cout << "Running Demo" << std::endl;
+
 
     std::cout << '\n' << '\n' << '\n';
     uint8_t  buffer[16] = {0};
     uint8_t  buffer2[16] = {0};
 
-    uint8_t pikachu[ROWS][COLS];
-    generateRandomMatrix(pikachu);
+    uint8_t frameBuffer[ROWS][COLS] = {0};
+    // generateRandomMatrix(frameBuffer);
     // Generate random data and write to both LED drivers
     srand(time(NULL));
     int start_line = 0;
+
+    int x_offset = 0;
+    int y_offset = 0;
+    int num = 6;
+
     while (true) {
    
-    circularRotateVertical(pikachu, 30, 30);
+    // circularRotateVertical(frameBuffer, 30, 30);
 
-    int buffer_index = 0;
-    for (int line  = start_line; line  < start_line + 7; line ++ ) {
-	// 0x01 << 7 for dot #6    
-	buffer2[buffer_index + 1] = pikachu[line][0] << 6 | pikachu[line][1] << 5 | pikachu[line][2] << 4 | pikachu[line][3] << 3 | pikachu[line][4] << 2 | pikachu[line][5] << 1 | pikachu[line][6];
-	buffer2[buffer_index] = pikachu[line][7] << 7 |  pikachu[line][8] << 6 | pikachu[line][9] << 5 | pikachu[line][10] << 4 | pikachu[line][11] << 3 | pikachu[line][12] << 2 | pikachu[line][13] << 1 | pikachu[line][14];
+        if(num < 99999)
+            num += 1;
+        else
+            num = 0;
 
-	buffer[buffer_index] = pikachu[line][29] | pikachu[line][28] << 1 | pikachu[line][27] << 2 | pikachu[line][26] << 3 | pikachu[line][25] << 4 | pikachu[line][24] << 5 | pikachu[line][23] << 6 | pikachu[line][22] << 7;
-	
-	buffer[buffer_index + 1] = pikachu[line][21] | pikachu[line][20] << 1 | pikachu[line][19] << 2 | pikachu[line][18] << 3 | pikachu[line][17] << 4 | pikachu[line][16] << 5 | pikachu[line][15] << 6;
+        std::string str =  std::string(6 - std::to_string(num).length(), '0') + std::to_string(num);
+        for(char e : str){
+                // Render char
+                std::cout << e << std::endl;
+                int i  = 0;
+                bool bits [5][8];
+                for(auto  & a: Font5x7_full[e-0x20]){
+                    numToBits(a, bits[i]);
+                    i++;
+                }
+                    // Copy
+                    // Wrap to function
 
-        buffer_index = buffer_index + 2;
-    }
-    
+                    for (int i = 0; i < 5; ++i) {
+                        for (int j = 0; j < 7; ++j) {
+                            frameBuffer[j + y_offset][i + x_offset] = bits[i][j];
+                        }
+                    }
+                    x_offset = x_offset + 5;
+        }
+        x_offset = 0;
 
+        //Copy 
+        int buffer_index = 0;
+        for (int line  = start_line; line  < start_line + 7; line ++ ) {
+            // 0x01 << 7 for dot #6    
+            buffer2[buffer_index + 1] = frameBuffer[line][0] << 6 | frameBuffer[line][1] << 5 | frameBuffer[line][2] << 4 | frameBuffer[line][3] << 3 | frameBuffer[line][4] << 2 | frameBuffer[line][5] << 1 | frameBuffer[line][6];
+            buffer2[buffer_index] = frameBuffer[line][7] << 7 |  frameBuffer[line][8] << 6 | frameBuffer[line][9] << 5 | frameBuffer[line][10] << 4 | frameBuffer[line][11] << 3 | frameBuffer[line][12] << 2 | frameBuffer[line][13] << 1 | frameBuffer[line][14];
+            buffer[buffer_index] = frameBuffer[line][29] | frameBuffer[line][28] << 1 | frameBuffer[line][27] << 2 | frameBuffer[line][26] << 3 | frameBuffer[line][25] << 4 | frameBuffer[line][24] << 5 | frameBuffer[line][23] << 6 | frameBuffer[line][22] << 7;        
+            buffer[buffer_index + 1] = frameBuffer[line][21] | frameBuffer[line][20] << 1 | frameBuffer[line][19] << 2 | frameBuffer[line][18] << 3 | frameBuffer[line][17] << 4 | frameBuffer[line][16] << 5 | frameBuffer[line][15] << 6;
+            buffer_index = buffer_index + 2;
+        }
+        
+
+        // TODO remove unnecessary copy 
         std::vector<unsigned char> data(16);
         for (int j = 0; j < 16; ++j) {
             data[j] = buffer2[j];
@@ -170,6 +203,7 @@ int main() {
             }
         }
 
+        // TODO remove unnecessary copy 
         // Generate new random data for the second LED driver
         for (int j = 0; j < 16; ++j) {
             data[j] = buffer[j];
