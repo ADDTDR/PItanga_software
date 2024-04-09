@@ -154,7 +154,6 @@ int main() {
         std::string str =  std::string(6 - std::to_string(num).length(), '0') + std::to_string(num);
         for(char e : str){
                 // Render char
-                std::cout << e << std::endl;
                 int i  = 0;
                 bool bits [5][8];
                 for(auto  & a: Font5x7_full[e-0x20]){
