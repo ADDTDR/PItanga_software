@@ -12,8 +12,8 @@ from serial_reader import GpsSerialReader
 import threading 
 
 GMT = 1
-HT16K33_ADDRESS_0 = 0x70
-HT16K33_ADDRESS_1 = 0x71
+HT16K33_ADDRESS_0 = 0x72
+HT16K33_ADDRESS_1 = 0x73
 
 
 HT16K33_CMD_BRIGHTNESS = 0xE0
