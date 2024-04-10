@@ -164,7 +164,7 @@ int main() {
         for(char e : str){
                 // Render char
                 int x  = 0;
-                bool bits [8][8];
+                bool bits [8][8] = {0};
                 for(auto  & a: Font5x7_full[e-0x20]){
                     numToBits(a, bits[x]);
                     x++;
@@ -173,11 +173,8 @@ int main() {
                     // Wrap to function
 
                     for (int i = 0; i < 5; ++i) {
-                        for (int j = 0; j < 7; ++j) {
-				if (bits[i][j] == true)
-                            		frameBuffer[j + y_offset][i + x_offset] = 1;
-				else 
-					frameBuffer[j + y_offset][i + x_offset] = 0; 
+                        for (int j = 0; j < 7; ++j) {				
+                     		frameBuffer[j + y_offset][i + x_offset] = bits[i][j];	
                         }
                     }
                     x_offset = x_offset + 5;
@@ -186,31 +183,16 @@ int main() {
 
         //Copy 
         int buffer_index = 0;
-        for (int line  = start_line; line  < start_line + 7; ++line ) {
-            // 0x01 << 7 for dot #6    
-	    //	std::cout << buffer_index << ':' << buffer_index+1  << ":line:" << line << '|'  << std::endl;
-	/*	for (int j = 0; j < 30; ++j) {
-			if (frameBuffer[line][j] == 1)
-		            std::cout << '1';
-			else
-			    std::cout << '0';
-        }
-		std::cout << std::endl;*/
-	
+        for (int line  = start_line; line  < start_line + 7; line ++ ) {
+            // 0x01 << 7 for dot #6
             buffer2[buffer_index + 1] = frameBuffer[line][0] << 6 | frameBuffer[line][1] << 5 | frameBuffer[line][2] << 4 | frameBuffer[line][3] << 3 |  frameBuffer[line][4] << 2  | frameBuffer[line][5] << 1  | frameBuffer[line][6];
             buffer2[buffer_index] =     frameBuffer[line][7] << 7 | frameBuffer[line][8] << 6 | frameBuffer[line][9] << 5 | frameBuffer[line][10] << 4 | frameBuffer[line][11] << 3 | frameBuffer[line][12] << 2 | frameBuffer[line][13] << 1 | frameBuffer[line][14];
-	   
-            buffer[buffer_index] = frameBuffer[line][29] | frameBuffer[line][28] << 1 | frameBuffer[line][27] << 2 | frameBuffer[line][26] << 3 | frameBuffer[line][25] << 4 | frameBuffer[line][24] << 5 | frameBuffer[line][23] << 6 | frameBuffer[line][22] << 7;        
+            buffer[buffer_index] = frameBuffer[line][29] | frameBuffer[line][28] << 1 | frameBuffer[line][27] << 2 | frameBuffer[line][26] << 3 | frameBuffer[line][25] << 4 | frameBuffer[line][24] << 5 | frameBuffer[line][23] << 6 | frameBuffer[line][22] << 7;
             buffer[buffer_index + 1] = frameBuffer[line][21] | frameBuffer[line][20] << 1 | frameBuffer[line][19] << 2 | frameBuffer[line][18] << 3 | frameBuffer[line][17] << 4 | frameBuffer[line][16] << 5 | frameBuffer[line][15] << 6;
-
-
- 	    buffer[13] = frameBuffer[line][21] | frameBuffer[line][20] << 1 | frameBuffer[line][19] << 2 | frameBuffer[line][18] << 3 | frameBuffer[line][17] << 4 | frameBuffer[line][16] << 5 | frameBuffer[line][15] << 6;
-
-
-	    buffer[14] =  frameBuffer[line][29] | frameBuffer[line][28] << 1 | frameBuffer[line][27] << 2 | frameBuffer[line][26] << 3 | frameBuffer[line][25] << 4 | frameBuffer[line][24] << 5 | frameBuffer[line][23] << 6 | frameBuffer[line][22] << 7; 
             buffer_index = buffer_index + 2;
-	    
         }
+        buffer[14] = buffer[12] & 0x1F;
+        buffer[15] = buffer[13];
             
 	//std::cout << std::endl;
 	// displayMatrix(frameBuffer);
