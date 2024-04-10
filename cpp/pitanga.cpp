@@ -191,8 +191,11 @@ int main() {
             buffer[buffer_index + 1] = frameBuffer[line][21] | frameBuffer[line][20] << 1 | frameBuffer[line][19] << 2 | frameBuffer[line][18] << 3 | frameBuffer[line][17] << 4 | frameBuffer[line][16] << 5 | frameBuffer[line][15] << 6;
             buffer_index = buffer_index + 2;
         }
-        buffer[14] = buffer[12] & 0x1F;
-        buffer[15] = buffer[13];
+        buffer[14] = buffer[12];
+        buffer[15] = buffer[13] & 0b00011111;
+
+	buffer2[14] = buffer2[12];
+	buffer2[15] = buffer2[13] & 0b00011111;
             
 	//std::cout << std::endl;
 	// displayMatrix(frameBuffer);
