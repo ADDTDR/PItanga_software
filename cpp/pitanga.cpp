@@ -12,12 +12,12 @@
 #include "fonts.h" 
 #include <ctime.h>
 
-#define HT16K33_ADDRESS_0 0x72
-#define HT16K33_ADDRESS_1 0x73
+#define HT16K33_ADDRESS_0 0x74
+#define HT16K33_ADDRESS_1 0x75
 #define HT16K33_TURN_ON_OSCILLATOR 0x21
 #define HT16K33_ENABLE_DISPLAY 0x81
 #define HT16K33_CMD_BRIGHTNESS 0xE0
-#define LED_DRIVER_BRIGHTNESS_LEVEL 0x05
+#define LED_DRIVER_BRIGHTNESS_LEVEL 0x0a
 void circularRotateVertical(uint8_t arr[][30], int numRows, int numCols);
 
 void circularRotateVertical(uint8_t (*arr)[30], int numRows, int numCols) {
@@ -160,8 +160,8 @@ int main() {
 
     int x_offset = 0;
     int y_offset = 0;
-    // int num = 6;
-
+    int num = 6;
+    uint8_t dots = 0b00000001;	
     while (true) {
    
     // circularRotateVertical(frameBuffer, 30, 30);
@@ -205,7 +205,15 @@ int main() {
 	buffer2[14] = buffer2[12];
 	buffer2[15] = buffer2[13] & 0b00011111;
             
-	//std::cout << std::endl;
+	if(dots == 0b00000100)
+		dots = 0b00000001;
+	else 
+		dots = dots << 1;
+
+
+	buffer[15] = buffer[15] | (dots & 0b00000001) << 6;
+        buffer[13] = buffer[13] | (dots & 0b00000100) << 5;
+        buffer[15] = buffer[15] | (dots & 0b00000010) << 6;
 	// displayMatrix(frameBuffer);
 
         // TODO remove unnecessary copy 
