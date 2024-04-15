@@ -206,14 +206,18 @@ int main() {
 	buffer2[15] = buffer2[13] & 0b00011111;
             
 	if(dots == 0b00000100)
-		dots = 0b00000001;
+		dots = 0b00000000;
 	else 
-		dots = dots << 1;
+		dots = 0b00000100;
 
 
 	buffer[15] = buffer[15] | (dots & 0b00000001) << 6;
         buffer[13] = buffer[13] | (dots & 0b00000100) << 5;
         buffer[15] = buffer[15] | (dots & 0b00000010) << 6;
+    
+    buffer2[15] = buffer2[15] | (dots & 0b00000001) << 6;
+        buffer2[13] = buffer2[13] | (dots & 0b00000100) << 5;
+        buffer2[15] = buffer2[15] | (dots & 0b00000010) << 6;
 	// displayMatrix(frameBuffer);
 
         // TODO remove unnecessary copy 
