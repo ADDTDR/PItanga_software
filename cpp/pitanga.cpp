@@ -206,19 +206,19 @@ int main() {
 	buffer2[14] = buffer2[12];
 	buffer2[15] = buffer2[13] & 0b00011111;
             
-	if(dots == 0b00000100)
+	if(dots == 0b00000010)
 		dots = 0b00000000;
 	else 
-		dots = 0b00000100;
+		dots = 0b00000010;
 
 
 	buffer[15] = buffer[15] | (dots & 0b00000001) << 6;
         buffer[13] = buffer[13] | (dots & 0b00000100) << 5;
         buffer[15] = buffer[15] | (dots & 0b00000010) << 6;
-    
-    buffer2[15] = buffer2[15] | (dots & 0b00000001) << 6;
-        buffer2[13] = buffer2[13] | (dots & 0b00000100) << 5;
-        buffer2[15] = buffer2[15] | (dots & 0b00000010) << 6;
+    //Shift by 1 position for first led driver  
+    buffer2[15] = buffer2[15] | (dots >> 1  & 0b00000001) << 6;
+        buffer2[13] = buffer2[13] | (dots >> 1 & 0b00000100) << 5;
+        buffer2[15] = buffer2[15] | (dots >> 1 & 0b00000010) << 6;
 	// displayMatrix(frameBuffer);
 
         // TODO remove unnecessary copy 
