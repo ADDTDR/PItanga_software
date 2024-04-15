@@ -12,8 +12,8 @@
 #include "fonts.h" 
 #include <ctime.h>
 
-#define HT16K33_ADDRESS_0 0x74
-#define HT16K33_ADDRESS_1 0x75
+#define HT16K33_ADDRESS_0 0x70
+#define HT16K33_ADDRESS_1 0x71
 #define HT16K33_TURN_ON_OSCILLATOR 0x21
 #define HT16K33_ENABLE_DISPLAY 0x81
 #define HT16K33_CMD_BRIGHTNESS 0xE0
