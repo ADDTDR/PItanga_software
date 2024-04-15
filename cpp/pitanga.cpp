@@ -10,6 +10,7 @@
 #include <bitset>
 #include <iterator>
 #include "fonts.h" 
+#include <ctime.h>
 
 #define HT16K33_ADDRESS_0 0x72
 #define HT16K33_ADDRESS_1 0x73
@@ -61,6 +62,16 @@ void numToBits(uint8_t num, bool bits[8]){
     for (int i = 0; i < 8; ++i) {
         bits[i] = (num >> i) & 1;
     }
+}
+
+std::string  getTime(){
+    std::time_t currentTime = std::time(nullptr);
+    std::tm *localTime = std::localtime(&currentTime);
+    std::string currentTimeString = std::to_string(localTime->tm_hour) + 
+                                    std::to_string(localTime->tm_min) +
+                                    std::to_string(localTime->tm_sec);
+
+    return currentTimeString;
 }
 
 int main() {
@@ -149,18 +160,15 @@ int main() {
 
     int x_offset = 0;
     int y_offset = 0;
-    int num = 6;
+    // int num = 6;
 
     while (true) {
    
     // circularRotateVertical(frameBuffer, 30, 30);
 
-        if(num < 99999)
-            num += 1;
-        else
-            num = 0;
 
-        std::string str = std::string(6 - std::to_string(num).length(), '0') + std::to_string(num);
+
+        std::string str = getTime();
         for(char e : str){
                 // Render char
                 int x  = 0;
