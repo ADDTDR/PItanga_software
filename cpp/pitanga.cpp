@@ -159,18 +159,27 @@ int main() {
     // generateRandomMatrix(frameBuffer);
     // Generate random data and write to both LED drivers
     srand(time(NULL));
-    int start_line = 0;
 
     int x_offset = 0;
     int y_offset = 0;
     int num = 6;
     uint8_t dots = 0b00000001;	
+
+
+    uint8_t mode_counter = 0; 
     while (true) {
-   
-    // circularRotateVertical(frameBuffer, 30, 30);
+     int start_line = 0;
 
+     
+  circularRotateVertical(frameBuffer, 30, 5);
 
-
+  if (mode_counter == 10 ){	
+  // Clear array  		
+/*	for (int i = 0; i < ROWS; i++) {
+        for (int j = 0; j < COLS; j++) {
+            frameBuffer[i][j] = 0;
+        }
+    }*/
         std::string str = getTime();
         for(char e : str){
                 // Render char
@@ -191,6 +200,10 @@ int main() {
                     x_offset = x_offset + 5;
         }
         x_offset = 0;
+	mode_counter = 0;
+  }else{
+  mode_counter +=1;
+  }
 
         //Copy 
         int buffer_index = 0;
@@ -258,7 +271,7 @@ int main() {
                 return 1;
             }
         }
-        usleep(202000);
+        usleep(100000);
     }
 
     close(fd);
