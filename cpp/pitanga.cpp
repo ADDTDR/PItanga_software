@@ -21,28 +21,29 @@
 #define HT16K33_ENABLE_DISPLAY 0x81
 #define HT16K33_CMD_BRIGHTNESS 0xE0
 #define LED_DRIVER_BRIGHTNESS_LEVEL 0x0a
-void circularRotateVertical(uint8_t arr[][30], int numRows, int numCols);
+const int ROWS = 30;
+const int COLS = 30;
 
-void circularRotateVertical(uint8_t (*arr)[30], int numRows, int numCols) {
+
+void circularRotateVertical(uint8_t (*arr)[30], int numRows, int numCols, int stopCols) {
     uint8_t temp[numCols];
     // Store the last row to temporary array
-    for (int i = 0; i < numCols; ++i) {
+    for (int i = stopCols; i < numCols; ++i) {
         temp[i] = arr[numRows - 1][i];
     }
     // Shift all rows up by one position
     for (int i = numRows - 1; i > 0; --i) {
-        for (int j = 0; j < numCols; ++j) {
+        for (int j = stopCols; j < numCols; ++j) {
             arr[i][j] = arr[i - 1][j];
         }
     }
     // Place the temporary array in the first row
-    for (int i = 0; i < numCols; ++i) {
+    for (int i = stopCols; i < numCols; ++i) {
         arr[0][i] = temp[i];
     }
 }
 
-const int ROWS = 30;
-const int COLS = 30;
+
 
 void generateRandomMatrix(uint8_t matrix[][COLS]) {
     for (int i = 0; i < ROWS; ++i) {
@@ -155,7 +156,7 @@ int main() {
     uint8_t  buffer[16] = {0};
     uint8_t  buffer2[16] = {0};
 
-    uint8_t frameBuffer[ROWS][COLS] = {0xff};
+    uint8_t frameBuffer[ROWS][COLS] = {0x00};
     // generateRandomMatrix(frameBuffer);
     // Generate random data and write to both LED drivers
     srand(time(NULL));
@@ -164,23 +165,23 @@ int main() {
     int y_offset = 0;
     int num = 6;
     uint8_t dots = 0b00000001;	
-
-
     uint8_t mode_counter = 0; 
+
+
     while (true) {
      int start_line = 0;
 
      
-  circularRotateVertical(frameBuffer, 30, 5);
+  circularRotateVertical(frameBuffer, 30, 30, 25);
+  
+    if (mode_counter == 10 ){	
 
-  if (mode_counter == 10 ){	
-  // Clear array  		
-/*	for (int i = 0; i < ROWS; i++) {
+    for (int i = 0; i < ROWS; i++) {
         for (int j = 0; j < COLS; j++) {
             frameBuffer[i][j] = 0;
         }
-    }*/
-        std::string str = getTime();
+    }   
+   std::string str = getTime();
         for(char e : str){
                 // Render char
                 int x  = 0;
@@ -200,7 +201,10 @@ int main() {
                     x_offset = x_offset + 5;
         }
         x_offset = 0;
-	mode_counter = 0;
+
+
+
+       	mode_counter = 0;
   }else{
   mode_counter +=1;
   }
