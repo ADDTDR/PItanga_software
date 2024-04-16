@@ -258,7 +258,7 @@ int main() {
                 return 1;
             }
         }
-        usleep(102000);
+        usleep(202000);
     }
 
     close(fd);
