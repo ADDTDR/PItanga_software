@@ -172,15 +172,14 @@ int main() {
      int start_line = 0;
 
      
-  circularRotateVertical(frameBuffer, 30, 30, 25);
-  
-    if (mode_counter == 10 ){	
+    
+    if (mode_counter == 8 ){	
 
-    for (int i = 0; i < ROWS; i++) {
+   /* for (int i = 0; i < ROWS; i++) {
         for (int j = 0; j < COLS; j++) {
             frameBuffer[i][j] = 0;
         }
-    }   
+    }*/   
    std::string str = getTime();
         for(char e : str){
                 // Render char
@@ -201,12 +200,13 @@ int main() {
                     x_offset = x_offset + 5;
         }
         x_offset = 0;
-
-
-
        	mode_counter = 0;
+
+
   }else{
   mode_counter +=1;
+  // circularRotateVertical(frameBuffer, 8, 30, 25);
+
   }
 
         //Copy 
