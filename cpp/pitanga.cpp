@@ -2,18 +2,13 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
-#include <string.h>
+#include <string>
 #include <linux/i2c-dev.h>
 #include <vector>
-#include <cstdlib>
-#include <ctime>
-#include <bitset>
-#include <iterator>
 #include <ctime>
 #include <iomanip>
 #include <sstream>
 #include "fonts.h" 
-
 
 #define HT16K33_ADDRESS_0 0x70
 #define HT16K33_ADDRESS_1 0x71
@@ -21,9 +16,13 @@
 #define HT16K33_ENABLE_DISPLAY 0x81
 #define HT16K33_CMD_BRIGHTNESS 0xE0
 #define LED_DRIVER_BRIGHTNESS_LEVEL 0x0a
+
 const int ROWS = 30;
 const int COLS = 30;
 
+const char *device = "/dev/i2c-1"; // I2C bus device path
+int fd = open(device, O_RDWR);
+int fd2 = open(device, O_RDWR);
 
 void circularRotateVertical(uint8_t (*arr)[30], int numRows, int numCols, int stopCols) {
     uint8_t temp[numCols];
@@ -45,22 +44,22 @@ void circularRotateVertical(uint8_t (*arr)[30], int numRows, int numCols, int st
 
 
 
-void generateRandomMatrix(uint8_t matrix[][COLS]) {
-    for (int i = 0; i < ROWS; ++i) {
-        for (int j = 0; j < COLS; ++j) {
-            matrix[i][j] = rand() % 2; // Generates 0 or 1 randomly
-        }
-    }
-}
+//void generateRandomMatrix(uint8_t matrix[][COLS]) {
+//    for (int i = 0; i < ROWS; ++i) {
+//        for (int j = 0; j < COLS; ++j) {
+//            matrix[i][j] = rand() % 2; // Generates 0 or 1 randomly
+//        }
+//    }
+//}
 
-void displayMatrix(uint8_t frameBuffer[][COLS]) {
-    for (int i = 0; i < ROWS; ++i) {
-        for (int j = 0; j < COLS; ++j) {
-            std::cout << frameBuffer[i][j] << " ";
-        }
-        std::cout << std::endl;
-    }
-}
+//void displayMatrix(uint8_t frameBuffer[][COLS]) {
+//    for (int i = 0; i < ROWS; ++i) {
+//        for (int j = 0; j < COLS; ++j) {
+//            std::cout << frameBuffer[i][j] << " ";
+//        }
+//        std::cout << std::endl;
+//    }
+//}
 
 void numToBits(uint8_t num, bool bits[8]){
     for (int i = 0; i < 8; ++i) {
@@ -78,10 +77,8 @@ std::string  getTime(){
     return ss.str();
 }
 
-int main() {
-    const char *device = "/dev/i2c-1"; // I2C bus device path
-    int fd = open(device, O_RDWR);
-    int fd2 = open(device, O_RDWR);
+int  init_pitanga(){
+
     if (fd < 0) {
         std::cerr << "Error: Unable to open I2C device." << std::endl;
         return 1;
@@ -148,10 +145,14 @@ int main() {
         close(fd);
         return 1;
     }
+    return 0;
+}
 
+int main() {
+    init_pitanga();
     std::cout << "Running Demo" << std::endl;
 
-
+    unsigned char cmd[2];
     std::cout << '\n' << '\n' << '\n';
     uint8_t  buffer[16] = {0};
     uint8_t  buffer2[16] = {0};
@@ -159,11 +160,11 @@ int main() {
     uint8_t frameBuffer[ROWS][COLS] = {0x00};
     // generateRandomMatrix(frameBuffer);
     // Generate random data and write to both LED drivers
-    srand(time(NULL));
+//    srand(time(nullptr));
 
     int x_offset = 0;
     int y_offset = 0;
-    int num = 6;
+
     uint8_t dots = 0b00000001;	
     uint8_t mode_counter = 0; 
 
@@ -176,9 +177,9 @@ int main() {
   
     if (mode_counter == 10 ){	
 
-    for (int i = 0; i < ROWS; i++) {
-        for (int j = 0; j < COLS; j++) {
-            frameBuffer[i][j] = 0;
+    for (auto & i : frameBuffer) {
+        for (unsigned char & j : i) {
+            j = 0;
         }
     }   
    std::string str = getTime();
@@ -201,9 +202,6 @@ int main() {
                     x_offset = x_offset + 5;
         }
         x_offset = 0;
-
-
-
        	mode_counter = 0;
   }else{
   mode_counter +=1;
@@ -230,11 +228,11 @@ int main() {
 	else 
 		dots = 0b00000010;
 
-
+    // Dots 
 	buffer[15] = buffer[15] | (dots & 0b00000001) << 6;
         buffer[13] = buffer[13] | (dots & 0b00000100) << 5;
         buffer[15] = buffer[15] | (dots & 0b00000010) << 6;
-    //Shift by 1 position for first led driver  
+    // Shift by 1 position for first led driver  
     buffer2[15] = buffer2[15] | (dots >> 1  & 0b00000001) << 6;
         buffer2[13] = buffer2[13] | (dots >> 1 & 0b00000100) << 5;
         buffer2[15] = buffer2[15] | (dots >> 1 & 0b00000010) << 6;
@@ -278,9 +276,5 @@ int main() {
         usleep(100000);
     }
 
-    close(fd);
-    close(fd2);
-
-    return 0;
 }
 

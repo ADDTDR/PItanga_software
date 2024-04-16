@@ -1,0 +1,3 @@
+/media/ad/Work/PItanga_software/cpp/cmake-build-debug/CMakeFiles/cpp.dir
+/media/ad/Work/PItanga_software/cpp/cmake-build-debug/CMakeFiles/edit_cache.dir
+/media/ad/Work/PItanga_software/cpp/cmake-build-debug/CMakeFiles/rebuild_cache.dir
