@@ -173,15 +173,15 @@ int main() {
         int start_line = 0;
 
 
-        circularRotateVertical(frameBuffer, 30, 30, 25);
+//        circularRotateVertical(frameBuffer, 30, 30, 25);
 
         if (mode_counter == 10 ){
 
-            for (auto & i : frameBuffer) {
-                for (unsigned char & j : i) {
-                    j = 0;
-                }
-            }
+//            for (auto & i : frameBuffer) {
+//                for (unsigned char & j : i) {
+//                    j = 0;
+//                }
+//            }
             std::string str = getTime();
             for(char e : str){
                 // Render char
