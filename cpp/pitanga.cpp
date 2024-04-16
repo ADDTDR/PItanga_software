@@ -8,7 +8,7 @@
 #include <ctime>
 #include <iomanip>
 #include <sstream>
-#include "fonts.h" 
+#include "fonts.h"
 
 #define HT16K33_ADDRESS_0 0x70
 #define HT16K33_ADDRESS_1 0x71
@@ -72,8 +72,8 @@ std::string  getTime(){
     std::time_t currentTime = std::time(nullptr);
     std::tm *localTime = std::localtime(&currentTime);
     ss << std::setw(2) << std::setfill('0') << localTime->tm_hour
-    << std::setw(2) << std::setfill('0') << localTime->tm_min
-    << std::setw(2) << std::setfill('0') << localTime->tm_sec;
+       << std::setw(2) << std::setfill('0') << localTime->tm_min
+       << std::setw(2) << std::setfill('0') << localTime->tm_sec;
     return ss.str();
 }
 
@@ -165,22 +165,25 @@ int main() {
     int x_offset = 0;
     int y_offset = 0;
 
-    uint8_t dots = 0b00000001;	
-    uint8_t mode_counter = 0; 
+    uint8_t dots = 0b00000001;
+    uint8_t mode_counter = 0;
 
 
     while (true) {
-     int start_line = 0;
+        int start_line = 0;
 
-     
-    
-    if (mode_counter == 8 ){	
 
-        for (int j = 0; j < COLS; j++) {
-        }
-    }*/   
-   std::string str = getTime();
-        for(char e : str){
+        circularRotateVertical(frameBuffer, 30, 30, 25);
+
+        if (mode_counter == 10 ){
+
+            for (auto & i : frameBuffer) {
+                for (unsigned char & j : i) {
+                    j = 0;
+                }
+            }
+            std::string str = getTime();
+            for(char e : str){
                 // Render char
                 int x  = 0;
                 bool bits [8][8] = {0};
@@ -188,23 +191,21 @@ int main() {
                     numToBits(a, bits[x]);
                     x++;
                 }
-                    // Copy
-                    // Wrap to function
+                // Copy
+                // Wrap to function
 
-                    for (int i = 0; i < 5; ++i) {
-                        for (int j = 0; j < 7; ++j) {				
-                     		frameBuffer[j + y_offset][i + x_offset] = bits[i][j];	
-                        }
+                for (int i = 0; i < 5; ++i) {
+                    for (int j = 0; j < 7; ++j) {
+                        frameBuffer[j + y_offset][i + x_offset] = bits[i][j];
                     }
-                    x_offset = x_offset + 5;
+                }
+                x_offset = x_offset + 5;
+            }
+            x_offset = 0;
+            mode_counter = 0;
+        }else{
+            mode_counter +=1;
         }
-        x_offset = 0;
-
-  }else{
-  mode_counter +=1;
-  // circularRotateVertical(frameBuffer, 8, 30, 25);
-
-  }
 
         //Copy 
         int buffer_index = 0;
@@ -219,23 +220,23 @@ int main() {
         buffer[14] = buffer[12];
         buffer[15] = buffer[13] & 0b00011111;
 
-	buffer2[14] = buffer2[12];
-	buffer2[15] = buffer2[13] & 0b00011111;
-            
-	if(dots == 0b00000010)
-		dots = 0b00000000;
-	else 
-		dots = 0b00000010;
+        buffer2[14] = buffer2[12];
+        buffer2[15] = buffer2[13] & 0b00011111;
 
-    // Dots 
-	buffer[15] = buffer[15] | (dots & 0b00000001) << 6;
+        if(dots == 0b00000010)
+            dots = 0b00000000;
+        else
+            dots = 0b00000010;
+
+        // Dots
+        buffer[15] = buffer[15] | (dots & 0b00000001) << 6;
         buffer[13] = buffer[13] | (dots & 0b00000100) << 5;
         buffer[15] = buffer[15] | (dots & 0b00000010) << 6;
-    // Shift by 1 position for first led driver  
-    buffer2[15] = buffer2[15] | (dots >> 1  & 0b00000001) << 6;
+        // Shift by 1 position for first led driver
+        buffer2[15] = buffer2[15] | (dots >> 1  & 0b00000001) << 6;
         buffer2[13] = buffer2[13] | (dots >> 1 & 0b00000100) << 5;
         buffer2[15] = buffer2[15] | (dots >> 1 & 0b00000010) << 6;
-	// displayMatrix(frameBuffer);
+        // displayMatrix(frameBuffer);
 
         // TODO remove unnecessary copy 
         std::vector<unsigned char> data(16);
