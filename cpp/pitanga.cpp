@@ -10,6 +10,8 @@
 #include <bitset>
 #include <iterator>
 #include <ctime>
+#include <iomanip>
+#include <sstream>
 #include "fonts.h" 
 
 
@@ -66,13 +68,13 @@ void numToBits(uint8_t num, bool bits[8]){
 }
 
 std::string  getTime(){
+    std::stringstream ss;
     std::time_t currentTime = std::time(nullptr);
     std::tm *localTime = std::localtime(&currentTime);
-    std::string currentTimeString = std::to_string(localTime->tm_hour) + 
-                                    std::to_string(localTime->tm_min) +
-                                    std::to_string(localTime->tm_sec);
-
-    return currentTimeString;
+    ss << std::setw(2) << std::setfill('0') << localTime->tm_hour
+    << std::setw(2) << std::setfill('0') << localTime->tm_min
+    << std::setw(2) << std::setfill('0') << localTime->tm_sec;
+    return ss.str();
 }
 
 int main() {
