@@ -4,7 +4,7 @@ import time
 VEML7700_ADDRESS = 0x10
 INTEGRATION_TIME_MS = 100
 
-bus = smbus.SMBus(0)
+bus = smbus.SMBus(1)
 
 # https://github.com/palouf34/veml7700/blob/master/veml7700.py
 def configure_sensor():

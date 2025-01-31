@@ -2,7 +2,7 @@ from smbus import SMBus
 import time
 import random 
 import os
-from font5x7 import Font5x7_180 as Font5x7
+from font5x7 import Font5x7_90 as Font5x7
 from datetime import datetime
 from pikachu import pikachu as pikachu_bitmap
 from ds1631 import Ds1631
@@ -12,8 +12,8 @@ from serial_reader import GpsSerialReader
 import threading 
 
 GMT = 1
-HT16K33_ADDRESS_0 = 0x72
-HT16K33_ADDRESS_1 = 0x73
+HT16K33_ADDRESS_0 = 0x70
+HT16K33_ADDRESS_1 = 0x71
 
 
 HT16K33_CMD_BRIGHTNESS = 0xE0
@@ -261,7 +261,7 @@ class Pitanga():
 
     # Display string 6 char
     def display_print(self, font, str_data, show_decimals=False, decimal_dots=0x00, update_leds=True):
-        str_data = str_data[::-1]
+        #str_data = str_data[::-1]
         font_first_char = 0x20
         bx = [0,0,0,0,0,0]
    
@@ -396,12 +396,12 @@ def main():
                 #    temperature = 't=' + temperature + '  '
                 #    pitanga.display_print(Font5x7, temperature[:6], show_decimals=False, decimal_dots=0xf00)
                 #    counter = 0
-                # # Show bitmap 
-                # pikachu_d = pikachu_d[1:] + pikachu_d[:1]
-                # pitanga.display_bitmap(pikachu_d)
-                #counter = counter + 1
-                decimal_dots = circular_left_rotate(decimal_dots, 1, 8)
-                pitanga.display_print(Font5x7, '       ', show_decimals=True, decimal_dots=decimal_dots & 0b00111111)
+                # Show bitmap
+                pikachu_d = pikachu_d[1:] + pikachu_d[:1]
+                pitanga.display_bitmap(pikachu_d)
+                counter = counter + 1
+                # decimal_dots = circular_left_rotate(decimal_dots, 1, 8)
+                # pitanga.display_print(Font5x7, '       ', show_decimals=True, decimal_dots=decimal_dots & 0b00111111)
                 time.sleep(0.12)
       
 
