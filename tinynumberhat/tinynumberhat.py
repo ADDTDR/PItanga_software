@@ -69,7 +69,6 @@ class TinynumberHat():
         buffer[7] = self.numbers.get(time_now[7], 0b01000000) | 0b10000000 if self.dp == True else self.numbers.get(
             time_now[7], 0b01000000)
         buffer[8] = self.numbers.get(time_now[8], 0b01000000)
-
         self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, buffer)
 
     def show_string(self, string):
@@ -100,8 +99,6 @@ class TinynumberHat():
             buffer[i] = self.numbers.get(ts[i], 0b01000000)
         self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, buffer)
 
-
-
     def read_key_data(self):
         keys_data = self.bus.read_i2c_block_data(self.ht16k33_i2c_address, 0x40, 5)
         keys = keys_data[4]
@@ -109,21 +106,20 @@ class TinynumberHat():
 
 
 if __name__ == "__main__":
-    tinynumberhat = TinynumberHat()
+    tiny_number_hat = TinynumberHat()
     text = ' HELLO HACKADAY 1HZ CHALLENGE '
     mode = 16
     while True:
-        key_data = tinynumberhat.read_key_data()
+        key_data = tiny_number_hat.read_key_data()
         if key_data != 0:
             mode = key_data
         if mode == 128:
             text = text[1:] + text[:1]
-            tinynumberhat.show_string(text)
+            tiny_number_hat.show_string(text)
         elif mode == 16:
-            tinynumberhat.show_time()
+            tiny_number_hat.show_time()
         elif mode == 32:
-            tinynumberhat.show_date()
+            tiny_number_hat.show_date()
         elif mode == 64:
-            tinynumberhat.show_timestamp()
-
+            tiny_number_hat.show_timestamp()
         time.sleep(0.1)
