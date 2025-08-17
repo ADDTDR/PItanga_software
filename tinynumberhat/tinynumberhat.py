@@ -15,7 +15,7 @@ class TinynumberHat():
     def __init__(self) -> None:
         self.bus = SMBus(SMBUS)
         self.ht16k33_i2c_address = HT16K33_ADDRESS_0
-
+        self.dp = True
         # Turn on oscillator
         self.bus.write_byte(self.ht16k33_i2c_address, HT16K33_TURN_ON_OSCILLATOR)
         # Enable display (no blinking mode)
@@ -30,42 +30,16 @@ class TinynumberHat():
         self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, [0x00] * 16)
 
         self.numbers = {
-            '0': 0b00111111,
-            '1': 0b00000110,
-            '2': 0b01011011,
-            '3': 0b01001111,
-            '4': 0b01100110,
-            '5': 0b01101101,
-            '6': 0b01111101,
-            '7': 0b00000111,
-            '8': 0b01111111,
-            '9': 0b01101111,
-            '.': 0b10000000,
-
-            'P': 0b01110011,
-            'L': 0b00111000,
-            'A': 0b01110111,
-            'B': 0b01111100,
-            'C': 0b00111001,
-            'D': 0b01011110,
-            'J': 0b00011110,
-            'G': 0b00111101,
-            'Y': 0b01101110,
-            'S': 0b01101101,
-            'T': 0b01111000,
-            'K': 0b01011001,
-            'O': 0b01011100,
-            'U': 0b00111110,
-            'E': 0b01111001,
-            'F': 0b01110001,
-            ' ': 0b00000000,
-            'H': 0b01110110,
-            'M': 0b00010101,
-            'N': 0b01010100,
-            'I': 0b00110000,
-            'Q': 0b01100111,
-            'R': 0b01010000,
-            '-': 0b01000000,
+            '0': 0b00111111, '1': 0b00000110, '2': 0b01011011, '3': 0b01001111,
+            '4': 0b01100110, '5': 0b01101101, '6': 0b01111101, '7': 0b00000111,
+            '8': 0b01111111, '9': 0b01101111, '.': 0b10000000, '-': 0b01000000,
+            ' ': 0b00000000, 'A': 0b01110111, 'B': 0b01111100, 'C': 0b00111001,
+            'D': 0b01011110, 'E': 0b01111001, 'F': 0b01110001, 'G': 0b00111101,
+            'H': 0b01110110, 'I': 0b00110000, 'J': 0b00011110, 'K': 0b01011001,
+            'L': 0b00111000, 'M': 0b00010101, 'N': 0b01010100, 'O': 0b00111111,
+            'P': 0b01110011, 'Q': 0b01100111, 'R': 0b01010000, 'S': 0b01101101,
+            'T': 0b01111000, 'U': 0b00111110, 'V': 0b00111110, 'W': 0b00011101,
+            'X': 0b01110110, 'Y': 0b01101110, 'Z': 0b01011011
         }
 
         self.numbers_2 = {
@@ -83,34 +57,23 @@ class TinynumberHat():
 
     def show_time(self):
         buffer = [0x00 for x in range(0, 16)]
+        self.dp = ~self.dp
+        time_now = datetime.now().strftime('%H-%M-%S%f')
+        buffer[0] = self.numbers.get(time_now[0], 0b01000000)
+        buffer[1] = self.numbers.get(time_now[1], 0b01000000)
+        buffer[2] = self.numbers.get(time_now[2], 0b01000000)
+        buffer[3] = self.numbers.get(time_now[3], 0b01000000)
+        buffer[4] = self.numbers.get(time_now[4], 0b01000000)
+        buffer[5] = self.numbers.get(time_now[5], 0b01000000)
+        buffer[6] = self.numbers.get(time_now[6], 0b01000000)
+        buffer[7] = self.numbers.get(time_now[7], 0b01000000) | 0b10000000 if self.dp == True else self.numbers.get(
+            time_now[7], 0b01000000)
+        buffer[8] = self.numbers.get(time_now[8], 0b01000000)
 
-        i = True
-        while True:
-            i = ~i
-            time_now = datetime.now().strftime('%H-%M-%S%f')
-            # print(datetime.now().strftime('%H.%M.%S.%f'))
-            buffer[0] = self.numbers.get(time_now[0], 0b01000000)
-            buffer[1] = self.numbers.get(time_now[1], 0b01000000)
-
-            buffer[2] = self.numbers.get(time_now[2], 0b01000000)
-            buffer[3] = self.numbers.get(time_now[3], 0b01000000)
-
-            buffer[4] = self.numbers.get(time_now[4], 0b01000000)
-            buffer[5] = self.numbers.get(time_now[5], 0b01000000)
-
-            buffer[6] = self.numbers.get(time_now[6], 0b01000000)
-            buffer[7] = self.numbers.get(time_now[7], 0b01000000) | 0b10000000 if i == True else self.numbers.get(
-                time_now[7], 0b01000000)
-            buffer[8] = self.numbers.get(time_now[8], 0b01000000)
-            # buffer[0] = 0b00000011
-            # Write buffer
-            self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, buffer)
-            # keys = bus.read_i2c_block_data(ht16k33_i2c_address, 0x40, 5)
-            # print(keys)
-            time.sleep(0.1)
+        self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, buffer)
 
     def show_string(self, string):
-        buffer = [0x00 for x in range(0, 16)]
+        buffer = [0x00] * 16
         buffer[0] = self.numbers.get(string[0], 0x00)
         buffer[1] = self.numbers.get(string[1], 0x00)
         buffer[2] = self.numbers.get(string[2], 0x00)
@@ -122,16 +85,45 @@ class TinynumberHat():
         buffer[8] = self.numbers.get(string[8], 0x00)
         self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, buffer)
 
+    def show_date(self):
+        buffer = [0x00] * 16
+        d = datetime.now().strftime('%d%m-%Y')
+        for i in range(len(d)):
+            buffer[i] = self.numbers.get(d[i], 0b01000000)
+        buffer[1] = buffer[1] | 0b10000000  # put dot
+        self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, buffer)
+
+    def show_timestamp(self):
+        buffer = [0x00] * 16
+        ts = str(int(time.time()))
+        for i in range(min(len(ts), 9)):
+            buffer[i] = self.numbers.get(ts[i], 0b01000000)
+        self.bus.write_i2c_block_data(self.ht16k33_i2c_address, 0x00, buffer)
+
+
+
+    def read_key_data(self):
+        keys_data = self.bus.read_i2c_block_data(self.ht16k33_i2c_address, 0x40, 5)
+        keys = keys_data[4]
+        return keys
+
 
 if __name__ == "__main__":
     tinynumberhat = TinynumberHat()
-    tinynumberhat.show_string('DEPECHE MODE ')
-    text = 'DEPECHE MODE ENJOY THE SILENCE '
-
+    text = ' HELLO HACKADAY 1HZ CHALLENGE '
+    mode = 16
     while True:
-        # text = text[1:] + text[:1]
-        # tinynumberhat.show_string(text)
-        tinynumberhat.show_time()
-        time.sleep(0.5)
+        key_data = tinynumberhat.read_key_data()
+        if key_data != 0:
+            mode = key_data
+        if mode == 128:
+            text = text[1:] + text[:1]
+            tinynumberhat.show_string(text)
+        elif mode == 16:
+            tinynumberhat.show_time()
+        elif mode == 32:
+            tinynumberhat.show_date()
+        elif mode == 64:
+            tinynumberhat.show_timestamp()
 
-
+        time.sleep(0.1)
